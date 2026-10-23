@@ -154,7 +154,7 @@ export async function exportScene(input, output, sceneDirectory = process.cwd())
     }
     if (n.crop) throw new Error(n.id + ': run image_assets.py prepare before exporting crop nodes');
     if (n.type === 'text') {
-      n.fontFamily ||= 'Arial'; n.fill ??= '#000000';
+      n.fontFamily ||= 'Times New Roman'; n.fill ??= '#000000';
     } else { n.fill ??= 'none'; n.stroke ??= 'none'; }
   }
   const normalized = expandEditableTextPaths(scene);

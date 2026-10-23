@@ -7,6 +7,12 @@ description: Convert a supplied diagram, screenshot, or scientific figure into a
 
 Reconstruct the supplied figure as a one-slide PPTX in its original aspect ratio. Each label, module, and arrow must be independently selectable. Use the bundled FigureForge native DrawingML exporter, pinned in [UPSTREAM.md](references/UPSTREAM.md). The assistant performs image understanding in the current conversation; no separate vision API or API key is required.
 
+## Typography and input boundaries
+
+- Use **Times New Roman** by default for English labels, titles, numerals, and mathematical text in reconstructed scientific figures. This is this skill's default convention, not a universal journal requirement. Explicit user, journal, or template font requirements override it; an explicit request to preserve the source typography also overrides it. Preserve the reference layout and relative type sizes when changing the font, and recheck spacing after native rendering.
+- Set fontFamily explicitly on text nodes. Use italic mathematical variables, upright operators and units, and the reference's bold emphasis. Use an installed fallback only for glyphs Times New Roman cannot display (for example Chinese or special symbols); disclose a material substitution.
+- When the user requests a **PNG-only / image-only** conversion, use only the supplied bitmap for recognition and measurement. Do not inspect neighboring draw.io, SVG, PDF, slide, code, or prior reconstructed scene files for the figure. Record the input boundary in scene.reviewNotes. If source-assisted reconstruction is permitted and used, say so rather than presenting it as a bitmap-only test.
+
 ## Workflow
 
 1. **Inspect the reference.** Obtain the actual local image, inspect it with the available image viewer, and read its dimensions with scripts/image_assets.py inspect. If an attachment has no accessible file, obtain it through the available file tools; ask for the file only when necessary. Preserve the original source.

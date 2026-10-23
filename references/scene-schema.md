@@ -30,7 +30,7 @@ All nodes require unique string IDs. Use optional name for a human-readable sele
 
 Colors accept #RGB, #RRGGBB, or "none". Geometry defaults to no fill/stroke; set visible colors explicitly. Default text is black. Text needs a box about fontSize * 1.3 high per line; inspect actual font metrics in native rendering. Wrapping is disabled; preserve explicit newline breaks. Text coordinates denote the layout box top-left, not the baseline.
 
-Use installed fonts that match the reference. Microsoft YaHei is a reasonable Windows fallback for Chinese. Keep small scientific labels faithful rather than applying presentation-wide font-size defaults.
+Use Times New Roman by default for English scientific labels, numerals, and mathematical text. An explicit user, journal, template, or source-typography requirement overrides this default. Set fontFamily explicitly. Microsoft YaHei is a reasonable Windows fallback for Chinese; use a symbol fallback only when required by missing glyphs. Keep small scientific labels faithful rather than applying presentation-wide font-size defaults, and recheck text widths after a font change.
 
 Array order is draw order. For a cube, use a separate closed polygon for each visible face. Table cells reconstructed this way are shapes, not a native data table.
 
