@@ -1,0 +1,23 @@
+{
+  "canvas": {"width": 1200, "height": 650},
+  "reviewNotes": [],
+  "nodes": [
+    {"id":"figure-title","type":"text","x":60,"y":38,"w":1080,"h":62,"text":"从图片到可编辑科研图","fontSize":42,"fontFamily":"Microsoft YaHei","bold":true,"fill":"#24364B"},
+    {"id":"subtitle","type":"text","x":62,"y":108,"w":1050,"h":40,"text":"Independent text boxes, shapes and arrows in PowerPoint","fontSize":24,"fontFamily":"Arial","fill":"#52657D"},
+    {"id":"input-module","type":"rect","x":60,"y":220,"w":280,"h":210,"radius":18,"fill":"#E8EFFA","stroke":"#4C71AA","strokeWidth":2.5},
+    {"id":"reconstruct-module","type":"rect","x":460,"y":220,"w":280,"h":210,"radius":18,"fill":"#F1EBFA","stroke":"#8961B0","strokeWidth":2.5},
+    {"id":"output-module","type":"rect","x":860,"y":220,"w":280,"h":210,"radius":18,"fill":"#E4F2EB","stroke":"#4D8D70","strokeWidth":2.5},
+    {"id":"input-to-reconstruction","type":"line","x":345,"y":325,"x2":450,"y2":325,"stroke":"#52657D","strokeWidth":3,"arrow":true},
+    {"id":"reconstruction-to-output","type":"line","x":745,"y":325,"x2":850,"y2":325,"stroke":"#52657D","strokeWidth":3,"arrow":true},
+    {"id":"input-glyph","type":"ellipse","x":160,"y":250,"w":80,"h":65,"fill":"#9FBEEA","stroke":"#4C71AA","strokeWidth":2},
+    {"id":"cube-top","type":"polyline","points":"555,270 580,247 645,247 620,270","closed":true,"fill":"#D3BDEB","stroke":"#8961B0","strokeWidth":2},
+    {"id":"cube-front","type":"polyline","points":"555,270 620,270 620,315 555,315","closed":true,"fill":"#B390D3","stroke":"#8961B0","strokeWidth":2},
+    {"id":"cube-side","type":"polyline","points":"620,270 645,247 645,292 620,315","closed":true,"fill":"#8961B0","stroke":"#8961B0","strokeWidth":2},
+    {"id":"output-glyph","type":"polyline","points":"955,285 985,310 1040,255","fill":"none","stroke":"#4D8D70","strokeWidth":7},
+    {"id":"input-label","type":"text","x":90,"y":345,"w":220,"h":50,"text":"输入图片","fontSize":30,"fontFamily":"Microsoft YaHei","anchor":"middle","fill":"#24364B"},
+    {"id":"reconstruct-label","type":"text","x":490,"y":345,"w":220,"h":50,"text":"逐元素重建","fontSize":30,"fontFamily":"Microsoft YaHei","anchor":"middle","fill":"#24364B"},
+    {"id":"output-label","type":"text","x":890,"y":345,"w":220,"h":50,"text":"可编辑 PPT","fontSize":30,"fontFamily":"Microsoft YaHei","anchor":"middle","fill":"#24364B"},
+    {"id":"refinement-loop","type":"path","d":"M 1000 445 C 1000 555 600 555 600 445","fill":"none","stroke":"#8961B0","strokeWidth":2.5,"arrow":true,"dash":true},
+    {"id":"refinement-label","type":"text","x":665,"y":555,"w":360,"h":45,"text":"渲染对照 · 按需修正","fontSize":25,"fontFamily":"Microsoft YaHei","anchor":"middle","fill":"#6E538C"}
+  ]
+}
