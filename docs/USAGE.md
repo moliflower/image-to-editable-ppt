@@ -1,0 +1,164 @@
+# Usage guide
+
+[Home](../README.md) · [简体中文](USAGE.zh-CN.md) · [Scene schema](../references/scene-schema.md)
+
+The agent interprets the reference image and reconstructs its elements. The local tools prepare image crops, export a scene, audit the package, and render the actual PPTX.
+
+## Installation and directory layout
+
+Start with the [quick start](../README.md#quick-start). Install the complete repository:
+
+```text
+image-to-editable-ppt/
+├── SKILL.md                     # Agent instructions
+├── agents/openai.yaml           # Skill display and invocation configuration
+├── scripts/
+│   ├── export_pptx.mjs          # Native PPTX exporter
+│   ├── image_assets.py         # Image inspection, crops, and embedding
+│   ├── audit_pptx.py           # Independent OOXML audit
+│   └── render_powerpoint.ps1   # PowerPoint rendering and edit probe
+├── references/                 # Scene format and upstream provenance
+├── vendor/figureforge/          # Pinned exporter and template
+├── examples/                   # Minimal scene and public SAM 2 example
+├── tests/
+└── requirements.txt            # Pillow
+```
+
+Run the following commands from the repository root:
+
+```bash
+node --version
+python --version
+python -m pip install -r requirements.txt
+```
+
+Use Node.js 18+ and Python 3.10+. Install Pillow in the Python environment that will run the scripts. The Node exporter requires no `npm install`.
+
+<a id="update"></a>
+
+## Update an existing installation
+
+From the installed skill directory:
+
+```bash
+git status --short
+git pull --ff-only
+python -m pip install -r requirements.txt
+```
+
+Preserve any local modifications before updating. For ZIP installations, back up your customized files and replace the complete skill directory. Keep generated outputs in a task directory or the ignored `build/` directory.
+
+## From image to scene
+
+Attach the image to a vision-capable agent session and invoke `$image-to-editable-ppt`. Specify whether to preserve source typography, use only the supplied bitmap, or consult additional source files. Identify any regions that may remain raster images.
+
+Inspect source dimensions:
+
+```bash
+python -X utf8 scripts/image_assets.py inspect path/to/reference.png
+```
+
+Create a detail crop for closer inspection. Adjust these example coordinates to the source image:
+
+```bash
+python -X utf8 scripts/image_assets.py crop path/to/reference.png --box 100 80 300 200 --output build/detail.png
+```
+
+Coordinates refer to the EXIF-oriented source image. Retain crop offsets when mapping measurements back to the full canvas.
+
+## Export an existing scene
+
+```bash
+node scripts/export_pptx.mjs --scene examples/diagram.scene.json --output build/figure.pptx
+```
+
+The exporter creates:
+
+| Output | Purpose |
+| --- | --- |
+| `build/figure.pptx` | Native editable slide |
+| `build/figure.exported.scene.json` | Normalized scene for auditing and revisions |
+| `build/figure.editability.json` | Object counts, raster regions, warnings, and verification status |
+
+The initial `visualVerification` status is `required`: successful export does not establish visual fidelity.
+
+Re-export the public SAM 2 example:
+
+```bash
+node scripts/export_pptx.mjs --scene examples/sam2/scene.json --output build/sam2.pptx
+```
+
+The [example notes](../examples/sam2/README.md) describe its source, retained photo regions, and actual PowerPoint demonstration.
+
+## Prepare image crops
+
+A scene may declare a photographic region using `crop`:
+
+```json
+{
+  "id": "sample-photo",
+  "type": "image",
+  "x": 100, "y": 200, "w": 180, "h": 120,
+  "crop": {"x": 100, "y": 200, "w": 180, "h": 120},
+  "assetPurpose": "photo",
+  "assetDescription": "Photograph from the reference image"
+}
+```
+
+Prepare those crops before exporting:
+
+```bash
+python -X utf8 scripts/image_assets.py prepare --scene build/scene.json --source path/to/reference.png --output build/prepared.scene.json
+node scripts/export_pptx.mjs --scene build/prepared.scene.json --output build/figure.pptx
+```
+
+The helper checks canvas dimensions and crop boundaries, then embeds PNG data. Diagram labels, modules, and arrows must remain native objects rather than being concealed inside photo crops.
+
+## Audit the PPTX
+
+Audit against the normalized exported scene:
+
+```bash
+python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
+```
+
+`passed: true` confirms the checked object names, counts, text, arrowheads, aspect ratio, and package relationships. It does not assess visual similarity, clipping, occlusion, or font metrics.
+
+## Render with Microsoft PowerPoint
+
+On Windows with desktop PowerPoint installed:
+
+```powershell
+powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
+```
+
+The script opens the target file without a presentation window, exports a PNG and an `.office.json` object record, then closes that file. It does not quit PowerPoint while other presentations remain open.
+
+To verify text editing, shape movement, and arrow recoloring in a separate copy:
+
+```powershell
+powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/probe.png -EditProbePath build/edited-probe.pptx
+```
+
+The preview is exported before probe edits; the modified document is saved separately. Other platforms may use an available PPTX renderer. Check the file in the intended presentation software when fonts or rendering differ.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Skill is not discovered | Check `skills/image-to-editable-ppt/SKILL.md`, custom `CODEX_HOME`, and the client's skill reload mechanism |
+| Missing exporter module | Install the complete repository, including `vendor/figureforge/` |
+| `No module named PIL` | Install `requirements.txt` using the same Python environment that runs the script |
+| Windows encoding error for symbols | Use the documented `python -X utf8 ...` invocation |
+| Export asks to prepare crops | Run `image_assets.py prepare` and export its output scene |
+| Crop bounds or canvas mismatch | Verify dimensions and EXIF orientation with `inspect` |
+| Text overflows or fonts differ | Install the required font or explicitly choose a fallback, adjust the scene, and render again |
+| PowerPoint COM access denied | Check desktop PowerPoint and whether the process is allowed to access desktop COM; use an authorized local process in restricted environments |
+| PowerShell blocks script execution | Follow your environment's approved execution mechanism, or open and export the file manually in PowerPoint |
+| Audit passes but the slide looks wrong | Inspect actual rendering, correct the scene, and repeat export and review |
+
+## Revise a generated figure
+
+Edit the retained scene, then export, audit, and render again. If you have already changed the PPTX directly, inspect that edited file before regenerating from an older scene.
+
+See the [scene schema](../references/scene-schema.md) for supported fields and the [contribution guide](../CONTRIBUTING.md) for development checks.

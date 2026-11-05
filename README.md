@@ -1,106 +1,207 @@
-# 图片转可编辑 PPT · Image to Editable PowerPoint
+<div align="center">
 
-一个面向 Codex 等支持 SKILL.md 的视觉智能体的 Skill：给它一张流程图、科研框架图或架构图，重建为 PowerPoint 中可分别修改的**文字框、形状和箭头**。
+<img src="docs/assets/hero.svg" alt="Image to Editable PowerPoint: reconstruct diagram text, shapes, and arrows as separate slide objects" width="100%">
 
-基于 [Top-Conf Figure Gallery / FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery) 的原生 PPTX 导出器。识图由当前智能体完成，导出脚本完全在本地运行，无须额外的视觉模型 API Key。
+# Image to Editable PowerPoint
 
-![原生 PPTX 示例预览](examples/diagram.png)
+**Reconstruct an existing diagram as PowerPoint objects you can keep editing.**
 
-[下载可编辑示例 PPTX](examples/diagram.pptx) · [查看场景 JSON](examples/diagram.scene.json) · [Skill 指令](SKILL.md)
+Visual understanding by your agent. Native PPTX export with a local FigureForge exporter.
 
-这个示例包含 **17 个独立对象、6 个文字框、3 条箭头**，已通过 Microsoft PowerPoint 原生渲染和修改测试。它是导出能力的受控示例，不是自动识图准确率评测。
+[![Checks](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml/badge.svg)](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2563eb.svg)](LICENSE)
+[![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853d.svg)](#quick-start)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](#quick-start)
+[![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed.svg)](SKILL.md)
 
-## 使用
+**English** · [简体中文](README.zh-CN.md)
 
-安装到 Codex 的个人技能目录：
+[Showcase](#showcase) · [Quick start](#quick-start) · [How it works](#how-it-works) · [FAQ](#faq) · [Contributing](CONTRIBUTING.md)
 
-~~~sh
-git clone https://github.com/moliflower/image-to-editable-ppt.git ~/.codex/skills/image-to-editable-ppt
-~~~
+</div>
 
-如果配置了自定义 CODEX_HOME，将目录替换为其下的 skills/image-to-editable-ppt。Windows PowerShell 可使用：
+---
 
-~~~powershell
-git clone https://github.com/moliflower/image-to-editable-ppt.git "$env:USERPROFILE/.codex/skills/image-to-editable-ppt"
-~~~
+<a id="showcase"></a>
 
-在支持技能的对话中附上图片，输入：
+## See it edited in PowerPoint
 
-> 使用 $image-to-editable-ppt 把这张图转成可编辑 PPT，保留布局，让文字、模块和箭头能单独修改。
+The GIF below records edits in desktop Microsoft PowerPoint. It selects a text box, changes a label, moves an encoder shape, selects a feedback arrow, and selects all independent objects.
 
-也可自然表达“把这张图转成可编辑 PPT”。Skill 的自动选择已启用，具体发现方式由所用智能体客户端决定。
+![Actual PowerPoint recording: select native text, edit a label, move a module, and select an arrow](docs/assets/powerpoint-editing.gif)
 
-科研图的英文标签、数字和数学文字默认使用 **Times New Roman**，保留原图布局与字号层次。这是本 Skill 的默认风格；你明确指定的字体、期刊或模板要求，以及“保留原图字体”的要求优先。中文或缺失符号可使用必要的字体回退。
+<div align="center">
 
-要测试纯图片转换，可以明确要求“只读取这张 PNG，不参考 draw.io、SVG 或其他源文件”。此时智能体仅根据位图识别与测量，并在转换记录中注明输入范围。
+[Download editable PPTX](examples/sam2/editable.pptx?raw=true) · [Inspect all-object selection](docs/assets/powerpoint-object-selection.png) · [Preview](examples/sam2/preview.png) · [Example and recording notes](examples/sam2/README.md)
 
-## 工作方式
+</div>
 
-1. 智能体查看原图，放大细节，识别文字、模块、箭头和层次关系。
-2. 按原图像素坐标生成结构化场景，每个元素有独立 ID。
-3. 使用随仓库固定版本附带的 FigureForge 导出器生成原生 DrawingML。
-4. 独立检查 PPTX 中的文字、对象数、箭头、包结构和长宽比。
-5. 渲染实际 PPTX，与原图核对并修正。
+### Public CV example: SAM 2 architecture
 
-**这是由智能体执行识图的 Skill，不是将任意图片交给一个命令就自动 OCR 完成的独立转换器。** 命令行导出器接收已重建的场景 JSON。SKILL.md 指导智能体完成图片到场景的步骤。
+Reconstructed from the architecture image in [Meta's official SAM 2 repository](https://github.com/facebookresearch/sam2/blob/2b90b9f5ceec907a1c18123530e92e794ad901a4/assets/model_diagram.png). The diagram includes image and memory encoders, memory attention, prompt and mask decoders, and temporal feedback paths. Source attribution and Apache-2.0 license are retained with the example.
 
-## 可编辑范围
+**58 independent objects · 50 native objects · 10 text boxes · 16 arrows · 8 photo crops**
 
-| 内容 | 输出 |
-|---|---|
-| 标题、标签、说明 | 原生文本框，可改内容、字号、字体、颜色 |
-| 模块框、圆、多边形 | 独立原生形状，可移动、缩放、改填充和线条 |
-| 直线、折线、曲线箭头 | 独立原生路径与箭头，可修改线条、几何和颜色 |
-| 照片、复杂纹理和原始素材 | 独立图片对象，内部仍是像素 |
-| 图表、公式 | 可用图形和文字重建，不代表恢复原始数据或原生公式结构 |
+<details>
+<summary><strong>Compare the public reference and the reconstructed PPTX</strong></summary>
 
-箭头不自动绑定到相邻模块，因此移动模块后可能需要调整箭头位置。低分辨率、密集标注、遮挡和特殊字体会影响复刻效果；对无法确认的内容会记录并披露。不会以整页底图加透明文字冒充可编辑图。
+**Official reference image**
 
-## 本地运行导出示例
+![Official SAM 2 architecture reference](examples/sam2/reference.png)
 
-需要 Node.js 18+、Python 3.10+。图片裁剪需要 Pillow：
+**Reconstructed PPTX, rendered by Microsoft PowerPoint**
 
-~~~sh
+![Native PowerPoint reconstruction of the SAM 2 architecture](examples/sam2/preview.png)
+
+[Scene JSON](examples/sam2/scene.json) · [Verification](examples/sam2/verification.json) · [Source and license](examples/sam2/README.md#source)
+
+</details>
+
+The animation uses captured desktop interaction states with English captions. The ribbon and selection handles are actual PowerPoint UI. Photo pixels remain images; text, modules, and arrows are separate native objects. Counts describe this example, not a general accuracy benchmark.
+
+<details>
+<summary><strong>Minimal export example: 17 objects</strong></summary>
+
+![Minimal scene with native text, geometric shapes, and a curved arrow](examples/diagram.png)
+
+[Download PPTX](examples/diagram.pptx?raw=true) · [Scene JSON](examples/diagram.scene.json)
+
+This controlled example contains 17 objects, 6 text boxes, and 3 arrows. Use it to verify the exporter, audit, and rendering setup.
+
+</details>
+
+## Features and use cases
+
+When all you have is a screenshot, a paper figure, or an old architecture image, a small change can mean redrawing the whole figure. This skill reconstructs the reference layout as independently selectable text boxes, shapes, and arrows.
+
+| Capability | Result |
+| --- | --- |
+| Element-by-element reconstruction | Labels, containers, network blocks, and arrows become separate objects |
+| Reference-based layout | Source aspect ratio, wording, spatial arrangement, and connection topology are preserved where reconstruction permits |
+| Native PowerPoint output | DrawingML text, shapes, and paths that can be edited directly |
+| Mixed visual content | Photographs, heatmaps, and complex textures remain separate image objects |
+| Export verification | Independent package audit followed by actual PPTX rendering and visual review |
+| Local exporter | No npm dependencies, network calls, or additional vision API key for export |
+
+Designed for scientific method figures, model architectures, flowcharts, and diagrams built from text and geometric elements. The agent interprets the image and authors a scene JSON. The CLI exports that scene; it is not a standalone image-to-OCR command.
+
+<a id="quick-start"></a>
+
+## Quick start
+
+### Requirements
+
+- A vision-capable agent with skill support for image interpretation.
+- **Node.js 18+** for PPTX export.
+- **Python 3.10+ and Pillow** for image crops and the independent audit workflow.
+- Optionally, **Microsoft PowerPoint on Windows** for the bundled rendering and edit-probe script. Creating the PPTX does not require Office. Other platforms can use an available PPTX renderer.
+
+The agent client's account requirements and image-processing behavior are separate from the local exporter.
+
+### Install the complete repository
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/moliflower/image-to-editable-ppt.git "${CODEX_HOME:-$HOME/.codex}/skills/image-to-editable-ppt"
+cd "${CODEX_HOME:-$HOME/.codex}/skills/image-to-editable-ppt"
 python -m pip install -r requirements.txt
+```
+
+**Windows PowerShell**
+
+```powershell
+$skillRoot = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
+$skillPath = Join-Path $skillRoot 'skills/image-to-editable-ppt'
+git clone https://github.com/moliflower/image-to-editable-ppt.git $skillPath
+Set-Location $skillPath
+python -m pip install -r requirements.txt
+```
+
+You can also [download the ZIP](https://github.com/moliflower/image-to-editable-ppt/archive/refs/heads/main.zip) and extract it into the skill directory. Keep `scripts/`, `references/`, and `vendor/` together with `SKILL.md`. If the destination already exists, see the [update instructions](docs/USAGE.md#update).
+
+### Attach an image and ask
+
+```text
+Use $image-to-editable-ppt to reconstruct this image as an editable PPTX.
+Preserve its wording, aspect ratio, and layout. Make text, modules, and arrows
+independently editable. Return the PPTX and a preview rendered from that file.
+```
+
+Automatic skill discovery depends on your agent client. You can request a PNG-only reconstruction that does not inspect neighboring source files, or ask to preserve the source typography.
+
+The skill produces a single-slide PPTX, a rendered preview when a renderer is available, and a retained scene JSON for revisions. Recognition uncertainties, raster regions, and incomplete visual checks are disclosed.
+
+English scientific labels, numbers, and mathematical text default to Times New Roman. Explicit typography, template, or source-font preservation instructions override this default. Chinese and unsupported glyphs use an installed fallback.
+
+<a id="how-it-works"></a>
+
+## How it works
+
+1. **Inspect** the image, zoom into dense regions, and identify text, geometry, layering, and arrow endpoints.
+2. **Reconstruct** a pixel-coordinate scene with stable IDs for separate objects.
+3. **Export** native DrawingML with the bundled, pinned FigureForge exporter.
+4. **Audit** text, object counts, arrowheads, aspect ratio, and OOXML package integrity.
+5. **Render and refine** the actual PPTX to check spacing, fonts, clipping, and directions.
+
+Structural validation does not establish visual fidelity. Image understanding is performed by the current agent; the local scripts do not send an image to another vision service.
+
+## Editability and limits
+
+| Source content | PowerPoint output | What remains limited |
+| --- | --- | --- |
+| Titles and labels | Native text boxes | Font substitution can change spacing |
+| Geometric shapes and modules | Independent native shapes | Complex modules may consist of several shapes |
+| Lines and arrows | Native line/path objects | Not automatically attached to adjacent modules |
+| Photos, heatmaps, complex artwork | Separate image objects | Internal content remains raster pixels |
+| Equations | Editable text and positioned scripts | Not recovered as native Office equations |
+| Charts in a bitmap | Reconstructed shapes and labels | Original data is not recovered |
+
+Small labels, occlusion, unusual fonts, and low-resolution inputs require extra review. Subtle textures, shadows, and typography may differ. The skill currently reconstructs one image per slide; it does not include an unattended batch-recognition service.
+
+## Verify the local toolchain
+
+From the repository root:
+
+```bash
 node scripts/export_pptx.mjs --scene examples/diagram.scene.json --output build/figure.pptx
-python scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json
-~~~
+python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
+```
 
-Windows 安装了 Microsoft PowerPoint 时，可以后台渲染并检查：
+On Windows with PowerPoint:
 
-~~~powershell
+```powershell
 powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
-~~~
+```
 
-PowerPoint 只用于最终渲染与验证，生成 PPTX 本身不需要 Office。其他平台可使用可用的 PPTX 渲染器；仅通过结构检查不能证明视觉还原准确。
+See the [usage guide](docs/USAGE.md) for crop preparation, updating, rendering, and troubleshooting, or the [scene schema](references/scene-schema.md) for fields and supported objects.
 
-场景格式、照片裁片和字体说明见 [scene-schema.md](references/scene-schema.md)。
+<a id="faq"></a>
 
-## 开发与验证
+## FAQ
 
-~~~sh
-node --test tests/test_export.mjs
-python -m unittest discover -s tests -p "test_*.py"
-~~~
+**Is the slide just a flattened image?** Text, diagram modules, and arrows are native objects. Declared photo/artwork regions may remain images. The workflow prohibits using a full-slide bitmap with invisible text as a substitute for reconstruction.
 
-测试覆盖中文原生文本、独立形状、曲线和箭头、照片裁片、无效输入拒绝、整页位图拒绝、OOXML 关系完整性以及被篡改文字的检测。GitHub Actions 运行结构和脚本测试，不运行 Microsoft PowerPoint。
+**Do I need another API key or a GPU?** The exporter needs neither. Your existing agent handles visual understanding, so it must support images and skill execution.
 
-可选的 Windows 修改验证会另存副本，不覆盖输入：
+**Can I share only `SKILL.md`?** Share the whole repository or ZIP. The instructions depend on the bundled scripts, references, and exporter.
 
-~~~powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx examples/diagram.pptx -OutputPng build/probe.png -EditProbePath build/edited-probe.pptx
-~~~
+**Why is the skill not showing up?** Check that the path ends in `skills/image-to-editable-ppt/SKILL.md`, with no extra ZIP nesting, and check any custom `CODEX_HOME`. Reload skills using your client's supported mechanism, or start a new session and invoke `$image-to-editable-ppt` explicitly.
 
-## 来源与许可
+**Does local export mean my image never leaves my computer?** The repository scripts make no network requests. Image handling by the agent client depends on that client.
 
-MIT License。封装与技能指令版权归本项目贡献者所有。FigureForge 导出器及模板保留其原有 MIT 版权与许可，位于 [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE)。
+## Documentation and contributions
 
-固定的上游版本、复用范围和适配说明见 [UPSTREAM.md](references/UPSTREAM.md)。本仓库不附带上游论文图片画廊，也不包含用户图片、API Key 或私人文档。
+- [Usage guide](docs/USAGE.md): installation, export, crop preparation, rendering, troubleshooting.
+- [Skill instructions](SKILL.md): the agent's full reconstruction workflow.
+- [Scene schema](references/scene-schema.md): coordinates, text, paths, gradients, and images.
+- [Contributing](CONTRIBUTING.md): reporting problems, sharing examples, and validating changes.
+- [Upstream provenance](references/UPSTREAM.md): pinned FigureForge version and adaptation details.
 
-## English
+Report problems through [Issues](https://github.com/moliflower/image-to-editable-ppt/issues). A reference image, expected result, and environment details help reproduce a problem.
 
-An assistant skill for reconstructing an existing diagram as editable PowerPoint text, shapes, and arrows. It reuses FigureForge's native DrawingML exporter. The assistant interprets the reference image and writes a pixel-coordinate scene; local scripts create and audit the PPTX. No additional vision API key is required.
+## Acknowledgments and license
 
-Install this repository as an agent skill and attach an image with: “Use $image-to-editable-ppt to rebuild this diagram as independently editable PowerPoint objects.”
+Native PPTX export is based on [Top-Conf Figure Gallery / FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery). Its original copyright and MIT license are retained in [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE).
 
-Photographs remain separate raster objects. Native paths are editable but not automatically bound connectors. Recognition and visual fidelity require per-image review. The included example and tests validate export behavior, not arbitrary-image reconstruction accuracy.
+Skill instructions and wrapper code use the [MIT License](LICENSE). The public SAM 2 reference and its adapted example retain [Apache-2.0 source attribution and licensing](examples/sam2/README.md#source).
