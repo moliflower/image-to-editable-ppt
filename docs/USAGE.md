@@ -114,6 +114,8 @@ node scripts/export_pptx.mjs --scene build/prepared.scene.json --output build/fi
 
 The helper checks canvas dimensions and crop boundaries, then embeds PNG data. Diagram labels, modules, and arrows must remain native objects rather than being concealed inside photo crops.
 
+New crops retain `sourceAssetId`, `sourceCrop`, and `sourceCanvas`, plus a `sourceAssets` manifest containing pixel digests. Declare the expected crop inventory before preparation to detect missing or duplicate source regions. Without a predeclared inventory, the manifest covers only the crop nodes you supplied. Placement and rotation can change without changing source coordinates.
+
 ## Audit the PPTX
 
 Audit against the normalized exported scene:
@@ -122,7 +124,26 @@ Audit against the normalized exported scene:
 python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
 ```
 
-`passed: true` confirms the checked object names, counts, text, arrowheads, aspect ratio, and package relationships. It does not assess visual similarity, clipping, occlusion, or font metrics.
+`passed: true` confirms the checked object names, counts, text, arrow ends, rotations, dash spacing, image pixels, aspect ratio, and package relationships. It does not assess visual similarity, occlusion, or font metrics.
+
+For prepared source crops, verify against the original pixels as well:
+
+```bash
+python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --source path/to/reference.png --report build/audit.json
+```
+
+Check `originalSourceVerifiedAssets` and `imagesWithoutSourceProvenance` in the report. Existing embedded-image scenes remain supported; a scene without crop provenance cannot establish source correspondence from its object count.
+
+## Native geometry capabilities
+
+Use `arrowStart: true` with `arrow: true` for a bidirectional path, `dash: [12, 6]` for source-pixel dash/gap lengths, and `rotation` for clockwise degrees on any supported object. The exporter preserves explicit font sizes and line breaks without browser Canvas or automatic fitting.
+
+```bash
+node scripts/export_pptx.mjs --scene examples/native-capabilities.scene.json --output build/native-capabilities.pptx
+python -X utf8 scripts/audit_pptx.py --pptx build/native-capabilities.pptx --scene build/native-capabilities.exported.scene.json --source examples/sam2/reference.png
+```
+
+See the [scene schema](../references/scene-schema.md) for normalized dash inputs and source manifests.
 
 ## Render with Microsoft PowerPoint
 

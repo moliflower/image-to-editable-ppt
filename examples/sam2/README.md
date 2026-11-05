@@ -45,13 +45,15 @@ All labels, modules, and connections are native objects. Eight photographic vide
 Audit the example from the repository root:
 
 ```bash
-python -X utf8 scripts/audit_pptx.py --pptx examples/sam2/editable.pptx --scene examples/sam2/scene.json --report build/sam2-audit.json
+python -X utf8 scripts/audit_pptx.py --pptx examples/sam2/editable.pptx --scene examples/sam2/scene.json --source examples/sam2/reference.png --report build/sam2-audit.json
 ```
 
 <a id="source"></a>
 <a id="asset-notes"></a>
 
 ## Source, attribution, and license
+
+All eight photo nodes now retain verified source-crop provenance. The capability update preserves the previous PowerPoint render pixel-for-pixel. `photo-crop.png` is a crop of the same public reference used by the [native geometry example](../native-capabilities.scene.json); it retains this source attribution and license.
 
 - **Project:** [SAM 2: Segment Anything in Images and Videos, AI at Meta / FAIR](https://github.com/facebookresearch/sam2).
 - **Reference:** [`assets/model_diagram.png`](https://github.com/facebookresearch/sam2/blob/2b90b9f5ceec907a1c18123530e92e794ad901a4/assets/model_diagram.png).

@@ -1,6 +1,9 @@
 import importlib.util
+import copy
+import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -8,6 +11,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 BUILD = ROOT / "build"
 BUILD.mkdir(exist_ok=True)
 
@@ -40,15 +44,20 @@ class ImageAuditTests(unittest.TestCase):
             node = json.loads(prepared.read_text())["nodes"][-1]
             self.assertTrue(node["href"].startswith("data:image/png;base64,"))
             self.assertNotIn("crop", node)
+            self.assertEqual(node["sourceCrop"], {"x": 20, "y": 30, "w": 120, "h": 80})
+            self.assertEqual(node["sourceAssetId"], "sample-photo")
             pptx = tmp / "figure.pptx"
             subprocess.run(["node", str(ROOT / "scripts/export_pptx.mjs"), "--scene", str(prepared),
                             "--output", str(pptx)], check=True, capture_output=True)
             normalized = tmp / "figure.exported.scene.json"
-            report = audit_module.audit(pptx, normalized)
+            report = audit_module.audit(pptx, normalized, source)
             self.assertTrue(report["passed"], report["errors"])
             self.assertEqual(report["images"], 1)
             self.assertEqual(report["textBoxes"], 6)
             self.assertEqual(report["arrows"], 3)
+            self.assertEqual(report["verifiedImagePixels"], 1)
+            self.assertEqual(report["verifiedSourceAssets"], 1)
+            self.assertTrue(report["originalSourceChecked"])
             broken = tmp / "broken.pptx"
             with zipfile.ZipFile(pptx) as src, zipfile.ZipFile(broken, "w") as dst:
                 for info in src.infolist():
@@ -57,6 +66,68 @@ class ImageAuditTests(unittest.TestCase):
                         data = data.replace("输入图片".encode(), "错误内容".encode())
                     dst.writestr(info, data)
             self.assertFalse(audit_module.audit(broken, normalized)["passed"])
+
+    def test_manifest_missing_duplicate_and_changed_source_are_detected(self):
+        with tempfile.TemporaryDirectory(dir=BUILD) as tmp:
+            tmp=Path(tmp); source=tmp/'source.png'; scene_path=tmp/'scene.json'; prepared=tmp/'prepared.json'
+            Image.new('RGB',(1200,650),(10,80,170)).save(source)
+            scene=json.loads((ROOT/'examples/diagram.scene.json').read_text(encoding='utf-8'))
+            photo={'id':'photo','type':'image','x':50,'y':500,'w':100,'h':70,'crop':{'x':10,'y':10,'w':100,'h':70},'assetPurpose':'photo'}
+            scene['nodes'].append(photo); scene_path.write_text(json.dumps(scene))
+            assets.prepare(scene_path,source,prepared)
+            good=json.loads(prepared.read_text())
+            missing=copy.deepcopy(good); missing['nodes'].pop()
+            scene_path.write_text(json.dumps(missing))
+            with self.assertRaisesRegex(ValueError,'exactly one'):
+                assets.prepare(scene_path,source,prepared)
+            duplicate=copy.deepcopy(good); extra=copy.deepcopy(duplicate['nodes'][-1]); extra['id']='duplicate'; duplicate['nodes'].append(extra)
+            scene_path.write_text(json.dumps(duplicate))
+            with self.assertRaisesRegex(ValueError,'exactly one'):
+                assets.prepare(scene_path,source,prepared)
+            scene_path.write_text(json.dumps(good))
+            Image.new('RGB',(1200,650),(170,80,10)).save(source)
+            with self.assertRaisesRegex(ValueError,'source pixels changed'):
+                assets.prepare(scene_path,source,prepared)
+
+    def test_audit_detects_arrow_rotation_dash_and_media_tampering(self):
+        with tempfile.TemporaryDirectory(dir=BUILD) as tmp:
+            tmp=Path(tmp); source=tmp/'source.png'; original=tmp/'scene.json'; prepared=tmp/'prepared.json'
+            Image.new('RGB',(1200,650),(20,120,190)).save(source)
+            scene=json.loads((ROOT/'examples/diagram.scene.json').read_text(encoding='utf-8'))
+            scene['nodes'][2]['rotation']=30
+            scene['nodes'][5].update(arrowStart=True,dash=[12,6],strokeWidth=2)
+            scene['nodes'].append({'id':'photo','type':'image','x':50,'y':500,'w':100,'h':70,'crop':{'x':10,'y':10,'w':100,'h':70},'assetPurpose':'photo','rotation':-12})
+            original.write_text(json.dumps(scene));assets.prepare(original,source,prepared)
+            pptx=tmp/'figure.pptx'
+            subprocess.run(['node',str(ROOT/'scripts/export_pptx.mjs'),'--scene',str(prepared),'--output',str(pptx)],check=True,capture_output=True)
+            normalized=tmp/'figure.exported.scene.json'
+            self.assertTrue(audit_module.audit(pptx,normalized,source)['passed'])
+            replacement=io.BytesIO();Image.new('RGB',(100,70),(190,120,20)).save(replacement,format='PNG')
+            alterations=[
+                ('arrow',b'<a:headEnd type="triangle"/>',b'<a:headEnd type="none"/>'),
+                ('rotation',b'rot="1800000"',b'rot="0"'),
+                ('dash',b'd="600000" sp="300000"',b'd="500000" sp="300000"'),
+                ('pixels',None,None)
+            ]
+            for label,before,after in alterations:
+                with self.subTest(label=label):
+                    changed=False; broken=tmp/(label+'.pptx')
+                    with zipfile.ZipFile(pptx) as src,zipfile.ZipFile(broken,'w') as dst:
+                        for info in src.infolist():
+                            data=src.read(info.filename)
+                            if label=='pixels' and info.filename=='ppt/media/image1.png':
+                                data=replacement.getvalue();changed=True
+                            elif info.filename=='ppt/slides/slide1.xml' and before and before in data:
+                                data=data.replace(before,after,1);changed=True
+                            dst.writestr(info,data)
+                    self.assertTrue(changed)
+                    report=audit_module.audit(broken,normalized,source)
+                    self.assertFalse(report['passed'])
+                    self.assertTrue(any(label in e for e in report['errors']),report['errors'])
+            wrong_source=tmp/'wrong.png';Image.new('RGB',(1200,650),'red').save(wrong_source)
+            report=audit_module.audit(pptx,normalized,wrong_source)
+            self.assertFalse(report['passed'])
+            self.assertTrue(any('original image' in e for e in report['errors']))
 
     def test_crop_bounds_and_canvas_mismatch(self):
         image = Image.new("RGB", (20, 20))

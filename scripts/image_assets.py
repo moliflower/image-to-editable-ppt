@@ -5,18 +5,11 @@ import base64
 import io
 import json
 from pathlib import Path
-from PIL import Image, ImageOps
-
-
-def open_image(filename):
-    with Image.open(filename) as source:
-        return ImageOps.exif_transpose(source).convert("RGBA")
+from image_provenance import open_image, checked_crop, pixel_digest, validate_resources
 
 
 def crop_box(image, x, y, w, h):
-    if w <= 0 or h <= 0 or min(x, y) < 0 or x + w > image.width or y + h > image.height:
-        raise ValueError("Crop is outside source image or has nonpositive size")
-    return image.crop((x, y, x + w, y + h))
+    return checked_crop(image, dict(x=x, y=y, w=w, h=h))
 
 
 def prepare(scene_path, source_path, output):
@@ -25,12 +18,42 @@ def prepare(scene_path, source_path, output):
     scene = json.loads(scene_path.read_text(encoding="utf-8-sig"))
     if scene.get("canvas") != {"width": image.width, "height": image.height}:
         raise ValueError("Scene canvas must equal EXIF-oriented source dimensions")
+    if output in (scene_path, Path(source_path).resolve()):
+        raise ValueError("Prepared output must not overwrite the source scene or image")
+    manifest = scene.get("sourceAssets", [])
+    if not isinstance(manifest, list):
+        raise ValueError("sourceAssets must be an array")
+    by_id = {}
+    source_canvas = {"width": image.width, "height": image.height}
+    for asset in manifest:
+        if not isinstance(asset, dict) or not isinstance(asset.get("id"), str) or not asset["id"].strip() or asset["id"] in by_id:
+            raise ValueError("Source asset IDs must be unique nonempty strings")
+        if asset.get("canvas", source_canvas) != source_canvas:
+            raise ValueError(asset["id"] + ": source canvas differs")
+        asset["canvas"] = source_canvas.copy()
+        digest = pixel_digest(checked_crop(image, asset.get("crop")))
+        if asset.get("pixelSha256", digest) != digest:
+            raise ValueError(asset["id"] + ": declared source pixels changed")
+        asset["pixelSha256"] = digest
+        by_id[asset["id"]] = asset
     for node in scene.get("nodes", []):
         if node.get("type") != "image":
             continue
         if "crop" in node:
             spec = node.pop("crop")
             part = crop_box(image, **{key: spec[key] for key in ("x", "y", "w", "h")})
+            identity = node.get("sourceAssetId", node.get("id"))
+            if not isinstance(identity, str) or not identity.strip():
+                raise ValueError("Crop node needs a stable ID")
+            canonical = {key: spec[key] for key in ("x", "y", "w", "h")}
+            asset = by_id.get(identity)
+            if asset is not None and asset["crop"] != canonical:
+                raise ValueError(identity + ": crop differs from declared source asset")
+            if asset is None:
+                asset = {"id": identity, "crop": canonical, "canvas": source_canvas.copy(), "pixelSha256": pixel_digest(part)}
+                manifest.append(asset)
+                by_id[identity] = asset
+            node.update(sourceAssetId=identity, sourceCrop=canonical.copy(), sourceCanvas=source_canvas.copy())
             data = io.BytesIO()
             part.save(data, format="PNG")
             node["href"] = "data:image/png;base64," + base64.b64encode(data.getvalue()).decode()
@@ -39,9 +62,14 @@ def prepare(scene_path, source_path, output):
             data = io.BytesIO()
             part.save(data, format="PNG")
             node["href"] = "data:image/png;base64," + base64.b64encode(data.getvalue()).decode()
+    if manifest:
+        scene["sourceAssets"] = manifest
+    errors, verified = validate_resources(scene, image)
+    if errors:
+        raise ValueError("\n".join(errors))
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(scene, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return {"output": str(output), "width": image.width, "height": image.height}
+    return {"output": str(output), "width": image.width, "height": image.height, "sourceAssets": verified}
 
 
 def main():

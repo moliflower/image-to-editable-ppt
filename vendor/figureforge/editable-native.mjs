@@ -1,4 +1,6 @@
-// Browser-only editable OOXML exporter. Every vector primitive becomes a native
+// FigureForge native OOXML exporter; local geometry backports are documented in
+// references/UPSTREAM.md. No browser text measurement or automatic font fitting.
+// Every vector primitive becomes a native
 // DrawingML shape; only photographic crops remain pictures.
 const EMU = 914400;
 const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -14,7 +16,13 @@ const xmlLine = (n, unit) => {
   const stroke = rgb(n.stroke);
   if (!stroke) return '<a:ln><a:noFill/></a:ln>';
   const width = Math.max(1, Math.round(num(n.strokeWidth || 1) * unit));
-  return `<a:ln w="${width}"><a:solidFill><a:srgbClr val="${stroke}"/></a:solidFill>${n.dash ? '<a:prstDash val="dash"/>' : ''}${n.arrow ? '<a:tailEnd type="triangle"/>' : ''}</a:ln>`;
+  let dash = n.dash === true ? '<a:prstDash val="dash"/>' : '';
+  if (Array.isArray(n.dash)) {
+    const pattern = n.dash.length % 2 ? [...n.dash, ...n.dash] : n.dash;
+    const relative = v => Math.min(2147483647, Math.round(v * unit / width * 100000));
+    dash = '<a:custDash>' + pattern.filter((_,i) => i % 2 === 0).map((v,i) => `<a:ds d="${relative(v)}" sp="${relative(pattern[i*2+1])}"/>`).join('') + '</a:custDash>';
+  }
+  return `<a:ln w="${width}"><a:solidFill><a:srgbClr val="${stroke}"/></a:solidFill>${dash}${n.arrowStart ? '<a:headEnd type="triangle"/>' : ''}${n.arrow ? '<a:tailEnd type="triangle"/>' : ''}</a:ln>`;
 };
 const xmlFill = n => {
   const stops=n.gradient?.stops;
@@ -111,6 +119,17 @@ const cubicPoint=(a,b,c,d,t)=>{
   const u=1-t;return point(u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,
     u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y);
 };
+export function editableShapeFrame(n) {
+  if (['path','polyline','line'].includes(n.type)) {
+    const paths = n.type === 'path' ? parseEditablePath(n.d) : null;
+    const coords = paths ? paths.flatMap(p => [p.start,...p.commands.flatMap(c =>
+      c.type === 'cubic' ? [c.c1,c.c2,c.end] : [c.end])]) : geometrySegments(n).flatMap(p => p.points);
+    if (!coords.length) return null;
+    const x = Math.min(...coords.map(p => p.x)), y = Math.min(...coords.map(p => p.y));
+    return {x,y,w:Math.max(.001,Math.max(...coords.map(p => p.x))-x),h:Math.max(.001,Math.max(...coords.map(p => p.y))-y)};
+  }
+  return {x:num(n.x),y:num(n.y),w:num(n.w),h:num(n.h)};
+}
 export function geometrySegments(n) {
   if (n.type === 'polyline' || n.points) {
     const values = String(n.points || '').match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/gi) || [];
@@ -196,7 +215,8 @@ function shapeXml(n,id,unit,media){
     const rid=`rIdImage${media.length+1}`, filename=`image${media.length+1}.${part.ext}`;
     media.push({...part,rid,filename});
     const x=Math.round(num(n.x)*unit), y=Math.round(num(n.y)*unit), w=Math.max(1,Math.round(num(n.w)*unit)), h=Math.max(1,Math.round(num(n.h)*unit));
-    return `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="FigureForge crop ${id}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`;
+    const rotation = num(n.rotation) ? ` rot="${Math.round(num(n.rotation)*60000)}"` : '';
+    return `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="FigureForge crop ${id}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm${rotation}><a:off x="${x}" y="${y}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`;
   }
   let x=num(n.x), y=num(n.y), w=num(n.w), h=num(n.h), geometry='';
   if(['path','polyline','line'].includes(n.type)){
@@ -206,11 +226,8 @@ function shapeXml(n,id,unit,media){
     // Control points bound every cubic, including extrema between sampled
     // positions. Using sampled bounds can put OOXML control points outside
     // the custom geometry viewport and clip circular arrows.
-    const coords=editablePaths?editablePaths.flatMap(p=>[p.start,...p.commands.flatMap(c=>
-      c.type==='cubic'?[c.c1,c.c2,c.end]:[c.end])]):paths.flatMap(p=>p.points);
-    const minX=Math.min(...coords.map(p=>p.x)),maxX=Math.max(...coords.map(p=>p.x));
-    const minY=Math.min(...coords.map(p=>p.y)),maxY=Math.max(...coords.map(p=>p.y));
-    x=minX;y=minY;w=Math.max(maxX-minX,0.001);h=Math.max(maxY-minY,0.001);
+    const frame=editableShapeFrame(n),minX=frame.x,minY=frame.y;
+    x=minX;y=minY;w=frame.w;h=frame.h;
     let pathXml=(editablePaths||paths).map(p=>{
       if(editablePaths){
         const pt=q=>`<a:pt x="${Math.round((q.x-minX)*unit)}" y="${Math.round((q.y-minY)*unit)}"/>`;
@@ -246,7 +263,8 @@ function shapeXml(n,id,unit,media){
     const rotation=Number.isFinite(Number(n.rotation))?` rot="${Math.round(num(n.rotation)*60000)}"`:'';
     return `<p:sp>${nv}<p:spPr><a:xfrm${rotation}><a:off x="${Math.round(x*unit)}" y="${Math.round(y*unit)}"/><a:ext cx="${Math.max(1,Math.round(w*unit))}" cy="${Math.max(1,Math.round(h*unit))}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr>${tx}</p:sp>`;
   }
-  return `<p:sp>${nv}<p:spPr><a:xfrm><a:off x="${Math.round(x*unit)}" y="${Math.round(y*unit)}"/><a:ext cx="${Math.max(1,Math.round(w*unit))}" cy="${Math.max(1,Math.round(h*unit))}"/></a:xfrm>${geometry}${xmlFill(n)}${xmlLine(n,unit)}</p:spPr></p:sp>`;
+  const rotation=num(n.rotation)?` rot="${Math.round(num(n.rotation)*60000)}"`:'';
+  return `<p:sp>${nv}<p:spPr><a:xfrm${rotation}><a:off x="${Math.round(x*unit)}" y="${Math.round(y*unit)}"/><a:ext cx="${Math.max(1,Math.round(w*unit))}" cy="${Math.max(1,Math.round(h*unit))}"/></a:xfrm>${geometry}${xmlFill(n)}${xmlLine(n,unit)}</p:spPr></p:sp>`;
 }
 
 let templatePromise;
@@ -330,7 +348,8 @@ export async function readNativePptxScene(blob,width,height){
     const box=coord(xfrm),line=child(props,'ln');
     const common={...box,fill:fill(props),gradient:gradient(props),stroke:fill(line),
       strokeWidth:line?Number(line.getAttribute('w')||0)/unit:0,
-      arrow:!!child(line,'tailEnd')};
+      arrow:!!child(line,'tailEnd')&&child(line,'tailEnd').getAttribute('type')!=='none',
+      arrowStart:!!child(line,'headEnd')&&child(line,'headEnd').getAttribute('type')!=='none'};
     if(shape.localName==='pic'){
       const blip=descendants(shape,'blip')[0];
       const rid=blip?.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','embed');

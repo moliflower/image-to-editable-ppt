@@ -1,0 +1,380 @@
+{
+  "canvas": {
+    "width": 1200,
+    "height": 700
+  },
+  "reviewNotes": [
+    "Original capability demonstration for the local exporter; no browser Canvas, font measurement, or automatic font resizing.",
+    "The rotated bitmap contains the public SAM 2 reference. Attribution and Apache-2.0 license: examples/sam2/README.md."
+  ],
+  "nodes": [
+    {
+      "id": "page-title",
+      "type": "text",
+      "x": 48,
+      "y": 30,
+      "w": 1100,
+      "h": 60,
+      "text": "Native PowerPoint capabilities",
+      "fontFamily": "Times New Roman",
+      "fontSize": 40,
+      "bold": true,
+      "fill": "#16354D"
+    },
+    {
+      "id": "page-subtitle",
+      "type": "text",
+      "x": 50,
+      "y": 94,
+      "w": 1100,
+      "h": 35,
+      "text": "Precise geometry, editable arrows and source-pixel verification",
+      "fontFamily": "Times New Roman",
+      "fontSize": 25,
+      "fill": "#536A7A"
+    },
+    {
+      "id": "arrow-panel",
+      "type": "rect",
+      "x": 40,
+      "y": 160,
+      "w": 545,
+      "h": 230,
+      "radius": 16,
+      "fill": "#F1F7FD",
+      "stroke": "#B2CBE2",
+      "strokeWidth": 1.5
+    },
+    {
+      "id": "arrow-heading",
+      "type": "text",
+      "x": 64,
+      "y": 174,
+      "w": 490,
+      "h": 40,
+      "text": "Bidirectional paths",
+      "fontFamily": "Times New Roman",
+      "fontSize": 29,
+      "bold": true,
+      "fill": "#203B54"
+    },
+    {
+      "id": "feature-module",
+      "type": "rect",
+      "x": 75,
+      "y": 234,
+      "w": 145,
+      "h": 57,
+      "radius": 10,
+      "fill": "#CDE6F7",
+      "stroke": "#396F99",
+      "strokeWidth": 2
+    },
+    {
+      "id": "feature-label",
+      "type": "text",
+      "x": 83,
+      "y": 245,
+      "w": 129,
+      "h": 36,
+      "text": "Features",
+      "fontFamily": "Times New Roman",
+      "fontSize": 27,
+      "anchor": "middle",
+      "fill": "#183A50"
+    },
+    {
+      "id": "memory-module",
+      "type": "rect",
+      "x": 396,
+      "y": 234,
+      "w": 145,
+      "h": 57,
+      "radius": 10,
+      "fill": "#D8EEDC",
+      "stroke": "#56835E",
+      "strokeWidth": 2
+    },
+    {
+      "id": "memory-label",
+      "type": "text",
+      "x": 404,
+      "y": 245,
+      "w": 129,
+      "h": 36,
+      "text": "Memory",
+      "fontFamily": "Times New Roman",
+      "fontSize": 27,
+      "anchor": "middle",
+      "fill": "#264E31"
+    },
+    {
+      "id": "bidirectional-link",
+      "type": "line",
+      "x": 238,
+      "y": 263,
+      "x2": 378,
+      "y2": 263,
+      "stroke": "#244B65",
+      "strokeWidth": 2.5,
+      "arrowStart": true,
+      "arrow": true
+    },
+    {
+      "id": "feedback-curve",
+      "type": "path",
+      "d": "M 468 306 C 468 363 148 363 148 306",
+      "fill": "none",
+      "stroke": "#8763A7",
+      "strokeWidth": 2.5,
+      "arrowStart": true,
+      "arrow": true,
+      "dash": [
+        9,
+        5
+      ]
+    },
+    {
+      "id": "dash-panel",
+      "type": "rect",
+      "x": 615,
+      "y": 160,
+      "w": 545,
+      "h": 230,
+      "radius": 16,
+      "fill": "#F5F2FC",
+      "stroke": "#CCBFDF",
+      "strokeWidth": 1.5
+    },
+    {
+      "id": "dash-heading",
+      "type": "text",
+      "x": 639,
+      "y": 174,
+      "w": 490,
+      "h": 40,
+      "text": "Custom dash spacing",
+      "fontFamily": "Times New Roman",
+      "fontSize": 29,
+      "bold": true,
+      "fill": "#45345E"
+    },
+    {
+      "id": "dash-long-label",
+      "type": "text",
+      "x": 640,
+      "y": 227,
+      "w": 205,
+      "h": 32,
+      "text": "Long dash  [12, 6]",
+      "fontFamily": "Times New Roman",
+      "fontSize": 23,
+      "fill": "#45345E"
+    },
+    {
+      "id": "dash-long",
+      "type": "line",
+      "x": 867,
+      "y": 243,
+      "x2": 1125,
+      "y2": 243,
+      "stroke": "#76569A",
+      "strokeWidth": 2,
+      "dash": [
+        12,
+        6
+      ]
+    },
+    {
+      "id": "dash-mixed-label",
+      "type": "text",
+      "x": 640,
+      "y": 278,
+      "w": 205,
+      "h": 32,
+      "text": "Mixed  [8, 4, 2, 4]",
+      "fontFamily": "Times New Roman",
+      "fontSize": 23,
+      "fill": "#45345E"
+    },
+    {
+      "id": "dash-mixed",
+      "type": "line",
+      "x": 867,
+      "y": 294,
+      "x2": 1125,
+      "y2": 294,
+      "stroke": "#76569A",
+      "strokeWidth": 2,
+      "dash": [
+        8,
+        4,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "dash-short-label",
+      "type": "text",
+      "x": 640,
+      "y": 329,
+      "w": 205,
+      "h": 32,
+      "text": "Fine dash  [2, 4]",
+      "fontFamily": "Times New Roman",
+      "fontSize": 23,
+      "fill": "#45345E"
+    },
+    {
+      "id": "dash-short",
+      "type": "line",
+      "x": 867,
+      "y": 345,
+      "x2": 1125,
+      "y2": 345,
+      "stroke": "#76569A",
+      "strokeWidth": 2,
+      "dash": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "rotation-panel",
+      "type": "rect",
+      "x": 40,
+      "y": 420,
+      "w": 545,
+      "h": 230,
+      "radius": 16,
+      "fill": "#F0F8F3",
+      "stroke": "#B5D5BF",
+      "strokeWidth": 1.5
+    },
+    {
+      "id": "rotation-heading",
+      "type": "text",
+      "x": 64,
+      "y": 434,
+      "w": 490,
+      "h": 40,
+      "text": "Rotated native geometry",
+      "fontFamily": "Times New Roman",
+      "fontSize": 29,
+      "bold": true,
+      "fill": "#2A5239"
+    },
+    {
+      "id": "rotated-rectangle",
+      "type": "rect",
+      "x": 95,
+      "y": 510,
+      "w": 100,
+      "h": 68,
+      "radius": 8,
+      "fill": "#B9DECA",
+      "stroke": "#4F8D6B",
+      "strokeWidth": 2,
+      "rotation": 22
+    },
+    {
+      "id": "rotated-ellipse",
+      "type": "ellipse",
+      "x": 257,
+      "y": 520,
+      "w": 130,
+      "h": 48,
+      "fill": "#C9DAF0",
+      "stroke": "#5B7AA7",
+      "strokeWidth": 2,
+      "rotation": -25
+    },
+    {
+      "id": "rotated-triangle",
+      "type": "polyline",
+      "points": "447,508 515,554 447,590",
+      "closed": true,
+      "fill": "#FFE3B9",
+      "stroke": "#AA7A39",
+      "strokeWidth": 2,
+      "rotation": 30
+    },
+    {
+      "id": "rotation-caption",
+      "type": "text",
+      "x": 65,
+      "y": 603,
+      "w": 490,
+      "h": 30,
+      "text": "Shapes and paths retain their native editable geometry",
+      "fontFamily": "Times New Roman",
+      "fontSize": 20,
+      "anchor": "middle",
+      "fill": "#4A6B55"
+    },
+    {
+      "id": "image-panel",
+      "type": "rect",
+      "x": 615,
+      "y": 420,
+      "w": 545,
+      "h": 230,
+      "radius": 16,
+      "fill": "#FFF8ED",
+      "stroke": "#E5CEAC",
+      "strokeWidth": 1.5
+    },
+    {
+      "id": "image-heading",
+      "type": "text",
+      "x": 639,
+      "y": 434,
+      "w": 490,
+      "h": 40,
+      "text": "Rotated independent image",
+      "fontFamily": "Times New Roman",
+      "fontSize": 29,
+      "bold": true,
+      "fill": "#6A4B25"
+    },
+    {
+      "id": "sam2-bitmap",
+      "type": "image",
+      "x": 800,
+      "y": 500,
+      "w": 174,
+      "h": 129,
+      "rotation": -9,
+      "assetPurpose": "photo",
+      "assetDescription": "Original photo crop from the official SAM 2 architecture diagram",
+      "file": "sam2/photo-crop.png",
+      "sourceAssetId": "sam2-photo",
+      "sourceCrop": {
+        "x": 103,
+        "y": 184,
+        "w": 218,
+        "h": 162
+      },
+      "sourceCanvas": {
+        "width": 1762,
+        "height": 444
+      }
+    }
+  ],
+  "sourceAssets": [
+    {
+      "id": "sam2-photo",
+      "crop": {
+        "x": 103,
+        "y": 184,
+        "w": 218,
+        "h": 162
+      },
+      "canvas": {
+        "width": 1762,
+        "height": 444
+      },
+      "pixelSha256": "6c111711bab7a43529d781422a230c28a852d3d2dbd979d9ddc29314b3b0463a"
+    }
+  ]
+}

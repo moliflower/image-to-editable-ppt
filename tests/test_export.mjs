@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { exportScene, validateScene } from '../scripts/export_pptx.mjs';
+import { rotatedBounds } from '../scripts/scene_geometry.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixture = JSON.parse(await fs.readFile(path.join(root, 'examples/diagram.scene.json'), 'utf8'));
@@ -61,4 +62,49 @@ test('rejects remote image URLs, invisible text and nonnumeric geometry', () => 
   assert.throws(() => validateScene(hidden), /invisible text/);
   const bad = structuredClone(fixture); bad.nodes[2].w = '280';
   assert.throws(() => validateScene(bad), /numeric/);
+});
+
+test('native start/end arrows, source-pixel dashes and all primitive rotations survive export without font fitting', async () => {
+  const scene={canvas:{width:1000,height:600},nodes:[
+    {id:'both',type:'line',x:50,y:100,x2:250,y2:100,arrow:true,arrowStart:true,dash:[12,6],stroke:'#000000',strokeWidth:2,rotation:10},
+    {id:'curve',type:'path',d:'M 50 200 C 100 150 200 250 250 200',arrowStart:true,strokeDasharray:'3, 2, 1',stroke:'#000000',strokeWidth:2,rotation:-25},
+    {id:'polygon',type:'polyline',points:'300,100 400,100 350,180',closed:true,fill:'#123456',rotation:45},
+    {id:'box',type:'rect',x:450,y:100,w:100,h:50,fill:'#345678',rotation:30},
+    {id:'oval',type:'ellipse',x:600,y:100,w:100,h:50,fill:'#345678',rotation:-15},
+    {id:'photo',type:'image',x:50,y:300,w:100,h:100,assetPurpose:'photo',file:'sam2/reference.png',rotation:12},
+    {id:'label',type:'text',x:300,y:300,w:20,h:50,text:'Explicit font size stays unchanged',fontSize:33,fontFamily:'Times New Roman',rotation:90}
+  ]};
+  const dir=await fs.mkdtemp(path.join(root,'build','native-caps-'));
+  try {
+    const result=await exportScene(scene,path.join(dir,'native.pptx'),path.join(root,'examples'));
+    const xml=member(await fs.readFile(path.join(dir,'native.pptx')),'ppt/slides/slide1.xml');
+    for(const angle of [10,-25,45,30,-15,12,90]) assert.ok(xml.includes(`rot="${angle*60000}"`));
+    assert.equal(result.arrows,2); assert.equal(result.arrowheads,3);
+    assert.equal((xml.match(/<a:headEnd type="triangle"\/>/g)||[]).length,2);
+    assert.equal((xml.match(/<a:tailEnd type="triangle"\/>/g)||[]).length,1);
+    assert.match(xml,/<a:custDash><a:ds d="600000" sp="300000"\/><\/a:custDash>/);
+    assert.match(xml,/<a:ds d="150000" sp="100000"\/><a:ds d="50000" sp="150000"\/><a:ds d="100000" sp="50000"\/>/);
+    assert.match(xml,/sz="2376"/);
+    const normalized=JSON.parse(await fs.readFile(path.join(dir,'native.exported.scene.json'),'utf8'));
+    assert.deepEqual(normalized.nodes[1].dash,[3,2,1,3,2,1]);
+    assert.equal(normalized.nodes[6].fontSize,33);
+    assert.equal(normalized.nodes[6].text,scene.nodes[6].text);
+  } finally { await fs.rm(dir,{recursive:true,force:true}); }
+});
+
+test('invalid dash/arrow declarations fail and rotated bounds warn about real clipping', () => {
+  for(const dash of [[],[0,0],[-1,2],[1,'2'],[Infinity,2],'','bad']) {
+    const scene=structuredClone(fixture); scene.nodes[2].dash=dash;
+    assert.throws(()=>validateScene(scene),/dash/);
+  }
+  const wrong=structuredClone(fixture);wrong.nodes[2].arrowStart=true;
+  assert.throws(()=>validateScene(wrong),/arrowheads require/);
+  const invisible=structuredClone(fixture);invisible.nodes[5].stroke='none';
+  assert.throws(()=>validateScene(invisible),/visible stroke/);
+  const rotated={id:'turned',type:'rect',x:10,y:20,w:100,h:20,rotation:90,fill:'#123456'};
+  const bounds=rotatedBounds(rotated);
+  [50,-20,70,80].forEach((v,i)=>assert.ok(Math.abs(bounds[i]-v)<1e-8));
+  assert.ok(validateScene({canvas:{width:1200,height:650},nodes:[rotated]}).some(s=>/outside the canvas/.test(s)));
+  const zeroDash=structuredClone(fixture);zeroDash.nodes[5].dash=[0,4];
+  assert.doesNotThrow(()=>validateScene(zeroDash));
 });

@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildNativePptx, expandEditableTextPaths, geometrySegments } from '../vendor/figureforge/editable-native.mjs';
+import { dashPattern, rotatedBounds, validateSourceAssets } from './scene_geometry.mjs';
 
 const base = path.dirname(fileURLToPath(import.meta.url));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -31,7 +32,14 @@ export function validateScene(scene) {
     for (const key of ['fill', 'stroke']) if (n[key] !== undefined && !color(n[key])) errors.push(id + ': invalid ' + key);
     if (n.strokeWidth !== undefined && (!finite(n.strokeWidth) || n.strokeWidth <= 0)) errors.push(id + ': invalid strokeWidth');
     if (n.radius !== undefined && (!finite(n.radius) || n.radius < 0)) errors.push(id + ': invalid radius');
-    if (n.rotation !== undefined && (!finite(n.rotation) || n.type !== 'text')) errors.push(id + ': rotation is supported on text only');
+    if (n.rotation !== undefined && !finite(n.rotation)) errors.push(id + ': rotation must be a finite angle in degrees');
+    for (const k of ['arrow','arrowStart']) if (n[k] !== undefined && typeof n[k] !== 'boolean') errors.push(id + ': '+k+' must be boolean');
+    if ((n.arrow || n.arrowStart) && !['line','path','polyline'].includes(n.type)) errors.push(id + ': arrowheads require a line or path');
+    try {
+      const dash = dashPattern(n);
+      if (dash && ['text','image'].includes(n.type)) errors.push(id + ': dashes require a geometric shape');
+      if ((dash || n.arrow || n.arrowStart) && (!n.stroke || n.stroke === 'none')) errors.push(id + ': dash/arrow needs a visible stroke');
+    } catch (e) { errors.push(id + ': ' + e.message); }
     if (n.gradient !== undefined) {
       if (!finite(n.gradient?.angle) || !Array.isArray(n.gradient?.stops) || n.gradient.stops.length < 2 ||
           n.gradient.stops.some(s => !finite(s.offset) || s.offset < 0 || s.offset > 1 || !color(s.color) || s.color === 'none'))
@@ -54,6 +62,7 @@ export function validateScene(scene) {
       if (pts.length < 2) errors.push(id + ': empty geometry');
       else bounds = [Math.min(...pts.map(p => p.x)), Math.min(...pts.map(p => p.y)), Math.max(...pts.map(p => p.x)), Math.max(...pts.map(p => p.y))];
     }
+    if (bounds && finite(n.rotation) && n.rotation) bounds = rotatedBounds(n);
     if (bounds && (bounds[0] < -1 || bounds[1] < -1 || bounds[2] > c.width + 1 || bounds[3] > c.height + 1))
       warnings.push(id + ': geometry extends outside the canvas; review clipping');
     if (n.type === 'text') {
@@ -72,6 +81,7 @@ export function validateScene(scene) {
     }
   }
   if (!scene.nodes.some(n => n.type !== 'image')) errors.push('A diagram must contain native editable objects');
+  errors.push(...validateSourceAssets(scene));
   if (errors.length) throw new Error(errors.join('\n'));
   return warnings;
 }
@@ -159,6 +169,10 @@ export async function exportScene(input, output, sceneDirectory = process.cwd())
   }
   const normalized = expandEditableTextPaths(scene);
   const warnings = validateScene(normalized);
+  for (const n of normalized.nodes) {
+    if (['dash','dashed','strokeDasharray'].some(k=>n[k]!==undefined)) n.dash=dashPattern(n);
+    delete n.dashed; delete n.strokeDasharray;
+  }
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async url => {
     if (url !== './pptx-template.json') throw new Error('Network access is not supported');
@@ -172,10 +186,13 @@ export async function exportScene(input, output, sceneDirectory = process.cwd())
   const summary = {
     status: 'exported', visualVerification: 'required', canvas: normalized.canvas,
     objectCount: normalized.nodes.length, counts,
-    arrows: normalized.nodes.filter(n => n.arrow).length,
+    arrows: normalized.nodes.filter(n => n.arrow || n.arrowStart).length,
+    arrowheads: normalized.nodes.reduce((sum,n)=>sum+Number(!!n.arrow)+Number(!!n.arrowStart),0),
+    sourceAssets: normalized.sourceAssets?.length || 0,
     imageRegions: normalized.nodes.filter(n => n.type === 'image').map(n => ({ id: n.id, purpose: n.assetPurpose, description: n.assetDescription || '' })),
     warnings, reviewNotes: normalized.reviewNotes || [],
-    upstreamRevision: 'dbf360a533ee46bc7d4a8f6037717c83f21a633a'
+    upstreamRevision: 'dbf360a533ee46bc7d4a8f6037717c83f21a633a',
+    geometryBackportRevision: '1e2e6283c48d005fbbaae81bc21b0eb6405b9e58'
   };
   output = path.resolve(output);
   if (!/\.pptx$/i.test(output)) throw new Error('Output must end in .pptx');

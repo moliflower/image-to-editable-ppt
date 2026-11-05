@@ -134,7 +134,17 @@ node scripts/export_pptx.mjs --scene build/prepared.scene.json --output build/fi
 python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
 ```
 
-`passed: true` 表示受检的对象数量、名称、文字、箭头、长宽比与包结构符合场景。它不检查视觉相似度，也不能代替字体、溢出、遮挡和箭头方向的人工或视觉核对。
+`passed: true` 表示受检的对象数量、名称、文字、两端箭头、旋转角度、虚线间距、图片像素、长宽比与包结构符合场景。它不检查整体视觉相似度，也不能代替字体和遮挡关系的视觉核对。
+
+新裁片会自动保留来源坐标和像素摘要。可预先声明 `sourceAssets` 清单，检查是否有漏图或重复绑定；未预先声明时，清单只覆盖已经提供的裁片节点。核对原图像素时增加 `--source`：
+
+```bash
+python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --source path/to/reference.png --report build/audit.json
+```
+
+报告中的 `originalSourceVerifiedAssets` 表示通过原图核验的裁片数量，`imagesWithoutSourceProvenance` 表示没有来源记录的旧图片对象。来源核验允许图片移动、缩放和旋转，不要求其放置坐标等于原图裁切坐标。
+
+原生线条支持 `arrowStart: true` 与 `arrow: true` 组成双端箭头，`dash: [12, 6]` 指定像素单位的虚线/间隔长度，所有对象支持 `rotation` 顺时针角度。显式字体、字号与换行保持不变，不使用浏览器 Canvas。示例见 [native-capabilities.scene.json](../examples/native-capabilities.scene.json)。
 
 ## PowerPoint 实际渲染
 

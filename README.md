@@ -83,6 +83,8 @@ When all you have is a screenshot, a paper figure, or an old architecture image,
 | Export verification | Independent package audit followed by actual PPTX rendering and visual review |
 | Local exporter | No npm dependencies, network calls, or additional vision API key for export |
 
+The local exporter supports **bidirectional arrows, custom dash spacing, and rotation of shapes, paths, and images**. New photo crops retain source coordinates and pixel digests; the audit can verify them against the original image. Explicit fonts and sizes remain under your control, with no browser Canvas dependency. See the [native capability example](examples/native-capabilities.scene.json) and [scene schema](references/scene-schema.md).
+
 Designed for scientific method figures, model architectures, flowcharts, and diagrams built from text and geometric elements. The agent interprets the image and authors a scene JSON. The CLI exports that scene; it is not a standalone image-to-OCR command.
 
 <a id="quick-start"></a>

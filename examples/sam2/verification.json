@@ -18,7 +18,13 @@
     "nativeShapes": 50,
     "textBoxes": 10,
     "images": 8,
-    "arrows": 16
+    "arrows": 16,
+    "arrowheads": 16,
+    "verifiedImagePixels": 8,
+    "verifiedSourceAssets": 8,
+    "originalSourceChecked": true,
+    "originalSourceVerifiedAssets": 8,
+    "imagesWithoutSourceProvenance": 0
   },
   "visualVerification": {
     "renderer": "Microsoft PowerPoint",
@@ -86,5 +92,10 @@
       }
     ]
   },
-  "scope": "File-specific checks and actual UI demonstration, not a general accuracy benchmark."
+  "scope": "File-specific checks and actual UI demonstration, not a general accuracy benchmark.",
+  "localCapabilityRegression": {
+    "originalSourceVerifiedAssets": 8,
+    "powerPointRenderPixelIdenticalToPrevious": true,
+    "browserCanvasRequired": false
+  }
 }
