@@ -85,6 +85,16 @@
 
 本地导出器支持 **双端箭头、自定义虚线间距，以及形状、路径和图片旋转**。新裁片会保留原图坐标与像素摘要，审计可回到原图逐项核验。字体、字号保持显式指定，不依赖浏览器 Canvas。参见[原生能力示例](examples/native-capabilities.scene.json)与[场景格式](references/scene-schema.md)。
 
+### 科研标注保留在同一个文本框
+
+同一文本框可以混排颜色、字体、粗斜体、下划线与**上下标**，修改标签时无需移动多个碎片。原生线性渐变支持色标透明度。独立审计会检查保存后的字号、字体、基线偏移及渐变参数，并继续核验图形与图片来源。
+
+![PowerPoint 实际渲染的原创能力示例：混合格式科研标注与原生透明渐变](examples/scientific-text/preview.png)
+
+[下载可编辑示例](examples/scientific-text/editable.pptx?raw=true) · [场景与验证说明](examples/scientific-text/README.md) · [同类项目代码调研](references/related-projects.md)
+
+这个原创能力示例含 18 个原生对象，其中 12 个文本框。上下标属于可编辑文字，不是原生公式对象；该示例用于展示新增能力，上面的 SAM 2 示例用于展示公开图片重建。
+
 **适合**科研方法图、模型结构图、技术流程图，以及由文字、规则形状和箭头组成的示意图。识图由你正在使用的视觉智能体完成；本项目提供技能指令与本地导出工具，命令行接收的是重建后的场景 JSON。
 
 <a id="quick-start"></a>

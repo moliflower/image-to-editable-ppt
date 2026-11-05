@@ -148,6 +148,15 @@ python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figu
 
 ## PowerPoint 实际渲染
 
+科研标签可通过同一文本节点的 `runs` 混排样式，所有片段拼接后必须与 `text` 完全一致。片段继承文本框的字体、颜色和粗斜体；`baselineShift` 的 `super` / `sub` 设置上下标，不会自动缩小字号。`lineSpacing` 使用原图像素，渐变色标的 `opacity` 范围为 0–1。
+
+```bash
+node scripts/export_pptx.mjs --scene examples/scientific-text.scene.json --output build/scientific-text.pptx
+python -X utf8 scripts/audit_pptx.py --pptx build/scientific-text.pptx --scene build/scientific-text.exported.scene.json
+```
+
+审计核验文件内实际保存的文字样式与渐变参数，测试还会故意篡改文件来检查能否发现错误。字段见[场景格式](../references/scene-schema.md#scientific-text-within-one-editable-box)，效果见[渲染示例](../examples/scientific-text/README.md)。字体是否安装、文字是否溢出仍须以实际渲染检查。
+
 Windows 安装了桌面版 PowerPoint 时：
 
 ```powershell

@@ -1,0 +1,24 @@
+{
+  "canvas": {"width": 1200, "height": 660},
+  "reviewNotes": ["Original capability demonstration, not a reconstructed paper figure. Superscripts and subscripts are editable text runs, not native equation objects."],
+  "nodes": [
+    {"id":"heading","type":"text","x":55,"y":32,"w":1090,"h":60,"text":"Scientific detail, still editable","fontFamily":"Times New Roman","fontSize":44,"bold":true,"fill":"#172F49"},
+    {"id":"subtitle","type":"text","x":55,"y":96,"w":1090,"h":40,"text":"Native text runs, explicit baselines, and transparent gradient stops","fontFamily":"Times New Roman","fontSize":24,"fill":"#52647A"},
+    {"id":"left-panel","type":"rect","x":55,"y":164,"w":530,"h":347,"radius":18,"fill":"#F1F6FB","stroke":"#C8D9E7","strokeWidth":1.5},
+    {"id":"right-panel","type":"rect","x":615,"y":164,"w":530,"h":347,"radius":18,"fill":"#F3F7F4","stroke":"#CBDBD1","strokeWidth":1.5},
+    {"id":"text-title","type":"text","x":82,"y":188,"w":470,"h":42,"text":"ONE BOX, MULTIPLE STYLES","fontFamily":"Times New Roman","fontSize":25,"bold":true,"fill":"#315C88"},
+    {"id":"formula","type":"text","x":90,"y":260,"w":465,"h":85,"text":"Ltotal = Lcls + λLbox","fontFamily":"Times New Roman","fontSize":41,"fill":"#172F49","runs":[{"text":"L","italic":true},{"text":"total","fontSize":24,"baselineShift":"sub"},{"text":" = "},{"text":"L","italic":true},{"text":"cls","fontSize":24,"baselineShift":"sub"},{"text":" + "},{"text":"λL","italic":true,"fill":"#286C62"},{"text":"box","fontSize":24,"baselineShift":"sub","fill":"#286C62"}]},
+    {"id":"feature-dimensions","type":"text","x":90,"y":353,"w":465,"h":76,"text":"F ∈ ℝH×W×C","fontFamily":"Times New Roman","fontSize":37,"fill":"#172F49","runs":[{"text":"F","bold":true,"italic":true},{"text":" ∈ ℝ"},{"text":"H×W×C","fontSize":24,"italic":true,"baselineShift":"super","fill":"#286C62"}]},
+    {"id":"text-note","type":"text","x":90,"y":449,"w":465,"h":34,"text":"Change a word without moving other labels.","fontFamily":"Times New Roman","fontSize":21,"fill":"#52647A","runs":[{"text":"Change a word","underline":true},{"text":" without moving other labels."}]},
+    {"id":"gradient-title","type":"text","x":642,"y":188,"w":470,"h":42,"text":"NATIVE GRADIENT + ALPHA","fontFamily":"Times New Roman","fontSize":25,"bold":true,"fill":"#286C62"},
+    {"id":"gradient-underlay","type":"rect","x":652,"y":268,"w":452,"h":108,"radius":14,"fill":"#DBE9F2"},
+    {"id":"gradient-overlay","type":"rect","x":652,"y":268,"w":452,"h":108,"radius":14,"fill":"none","gradient":{"angle":0,"stops":[{"offset":0,"color":"#315C88","opacity":1},{"offset":0.5,"color":"#428B7D","opacity":0.8},{"offset":1,"color":"#428B7D","opacity":0.05}]}},
+    {"id":"gradient-label","type":"text","x":672,"y":302,"w":410,"h":45,"text":"Feature confidence","fontFamily":"Times New Roman","fontSize":28,"bold":true,"fill":"#FFFFFF"},
+    {"id":"gradient-caption","type":"text","x":652,"y":400,"w":452,"h":78,"text":"Editable color stops\nTransparency blends with the shape below.","fontFamily":"Times New Roman","fontSize":21,"lineSpacing":30,"fill":"#52647A"},
+    {"id":"footer-rule","type":"line","x":55,"y":551,"x2":1145,"y2":551,"stroke":"#CFD9E3","strokeWidth":1},
+    {"id":"export-label","type":"text","x":68,"y":580,"w":190,"h":35,"text":"Scene JSON","fontFamily":"Times New Roman","fontSize":24,"fill":"#52647A"},
+    {"id":"export-arrow","type":"line","x":257,"y":594,"x2":334,"y2":594,"stroke":"#315C88","strokeWidth":2.5,"arrow":true},
+    {"id":"powerpoint-label","type":"text","x":360,"y":580,"w":350,"h":35,"text":"Native PowerPoint objects","fontFamily":"Times New Roman","fontSize":24,"fill":"#172F49","bold":true},
+    {"id":"local-note","type":"text","x":750,"y":583,"w":390,"h":33,"text":"Local export · No browser Canvas","fontFamily":"Times New Roman","fontSize":21,"fill":"#52647A","anchor":"end"}
+  ]
+}

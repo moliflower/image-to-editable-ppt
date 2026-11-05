@@ -20,7 +20,7 @@ All nodes require unique string IDs. Use optional name for a human-readable sele
 
 | Type | Required geometry | Useful properties |
 |---|---|---|
-| text | x,y,w,h,text,fontSize | fontFamily, bold, italic, anchor: start/middle/end, verticalAlign: top/middle, rotation |
+| text | x,y,w,h,text,fontSize | fontFamily, bold, italic, underline, runs, baselineShift, lineSpacing, anchor: start/middle/end, verticalAlign: top/middle, rotation |
 | rect | x,y,w,h | radius, fill, stroke, strokeWidth, dash, rotation |
 | ellipse | x,y,w,h | fill, stroke, strokeWidth, dash, rotation |
 | line | x,y,x2,y2 | stroke, strokeWidth, arrow, arrowStart, dash, rotation |
@@ -33,6 +33,43 @@ Colors accept #RGB, #RRGGBB, or "none". Geometry defaults to no fill/stroke; set
 Use Times New Roman by default for English scientific labels, numerals, and mathematical text. An explicit user, journal, template, or source-typography requirement overrides this default. Set fontFamily explicitly. Microsoft YaHei is a reasonable Windows fallback for Chinese; use a symbol fallback only when required by missing glyphs. Keep small scientific labels faithful rather than applying presentation-wide font-size defaults, and recheck text widths after a font change.
 
 Array order is draw order. For a cube, use a separate closed polygon for each visible face. Table cells reconstructed this way are shapes, not a native data table.
+
+## Scientific text within one editable box
+
+Use `runs` to preserve mixed formatting without splitting a label into independently positioned boxes:
+
+~~~json
+{"id":"loss-label","type":"text","x":80,"y":80,"w":320,"h":65,
+ "text":"Lcls + λLbox","fontSize":36,"fontFamily":"Times New Roman","fill":"#172F49",
+ "runs":[
+   {"text":"L","italic":true},
+   {"text":"cls","fontSize":23,"baselineShift":"sub"},
+   {"text":" + "},
+   {"text":"λL","italic":true,"fill":"#286C62"},
+   {"text":"box","fontSize":23,"baselineShift":"sub","fill":"#286C62"}
+ ]}
+~~~
+
+Run `text` values must concatenate exactly to the box's `text`, including spaces and line breaks; CRLF/CR normalize to LF. Each run inherits the box's `fontFamily`, `fontSize`, `fill`, `bold`, `italic`, `underline`, and `baselineShift`. Explicit `false` overrides inherited emphasis. These are the only supported run properties; misspellings fail validation. `runs` must be a nonempty array and cannot be combined with `textPath`.
+
+`baselineShift` accepts `none`, `super`, or `sub`, mapped to native baseline offsets of 0%, +30%, and -25%. It does not change the declared font size: set index size explicitly. Font sizes must map to 1–4000 PowerPoint points; export rejects values that would otherwise be clamped. This supports scientific indices, not native equation structures such as editable fractions or matrices.
+
+`lineSpacing` optionally sets the baseline-to-baseline distance in source pixels. Without it, multiline text uses 1.14 times the largest font size on each line (at least the box's base size). Empty lines, explicit spaces and Unicode survive export. Wrapping and automatic fitting remain disabled. Review superscript clearance, descenders and mixed font metrics in the real renderer.
+
+The independent audit checks run contents, font names in Latin/East Asian/complex-script slots, sizes, colors, emphasis, baseline offsets, alignment and line spacing. It checks OOXML declarations, not installed-font availability or visual fit. See the [runnable scene](../examples/scientific-text.scene.json) and [PowerPoint-rendered example](../examples/scientific-text/README.md).
+
+## Native linear gradients
+
+`gradient` applies to rectangles, ellipses, paths and polylines, with `angle` in clockwise degrees and at least two `stops`. Stops must be in nondecreasing `offset` order from 0 to 1; equal positions allow hard transitions. Colors are visible hex colors. Optional stop `opacity` is 0–1, defaults to 1, and blends with underlying objects. Example:
+
+~~~json
+"gradient": {"angle":0,"stops":[
+  {"offset":0,"color":"#315C88","opacity":1},
+  {"offset":1,"color":"#428B7D","opacity":0.05}
+]}
+~~~
+
+These are native linear shape fills, rotated with the shape. Text/image gradients, radial gradients, and unrecognized gradient properties are rejected. Open paths do not gain an enclosed fill automatically. The audit verifies native gradient presence, angle, stop order/positions/colors/opacity. Generic object opacity is still unsupported.
 
 ## Native arrows, dashes and rotation
 
@@ -72,6 +109,6 @@ Placement, scaling and rotation can change independently of the source crop. The
 
 Use reviewNotes for unreadable labels or unresolved measurements. Do not guess technical terms. Only use a visibly marked placeholder when unavoidable and disclose it.
 
-Generic opacity, HTML/CSS text, embedded SVG pictures, automatic connector binding, native charts, and native equations are unsupported. Basic gradients use gradient: {angle, stops:[{offset:0,color:"#FFFFFF"},{offset:1,color:"#AACCEE"}]}.
+Generic object opacity, HTML/CSS text, embedded SVG pictures, automatic connector binding, native charts, and native equations are unsupported. Use the supported text-run and linear-gradient contracts above for those specific styles.
 
 Export produces figure.exported.scene.json with normalized nodes and figure.editability.json. Audit against the normalized scene so object expansion and image embedding are counted correctly.

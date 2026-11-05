@@ -2,6 +2,7 @@
 // references/UPSTREAM.md. No browser text measurement or automatic font fitting.
 // Every vector primitive becomes a native
 // DrawingML shape; only photographic crops remain pictures.
+import { richTextParagraphs } from './editable-rich-text.mjs';
 const EMU = 914400;
 const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -28,7 +29,7 @@ const xmlFill = n => {
   const stops=n.gradient?.stops;
   if(Array.isArray(stops)&&stops.length>=2){
     const angle=((num(n.gradient.angle)%360)+360)%360;
-    return `<a:gradFill rotWithShape="1"><a:gsLst>${stops.map(s=>`<a:gs pos="${Math.round(Math.max(0,Math.min(1,num(s.offset)))*100000)}"><a:srgbClr val="${rgb(s.color)||'FFFFFF'}"/></a:gs>`).join('')}</a:gsLst><a:lin ang="${Math.round(angle*60000)}" scaled="1"/></a:gradFill>`;
+    return `<a:gradFill rotWithShape="1"><a:gsLst>${stops.map(s=>`<a:gs pos="${Math.round(Math.max(0,Math.min(1,num(s.offset)))*100000)}"><a:srgbClr val="${rgb(s.color)||'FFFFFF'}">${s.opacity === undefined ? '' : `<a:alpha val="${Math.round(s.opacity*100000)}"/>`}</a:srgbClr></a:gs>`).join('')}</a:gsLst><a:lin ang="${Math.round(angle*60000)%21600000}" scaled="1"/></a:gradFill>`;
   }
   const fill = rgb(n.fill);
   return fill ? `<a:solidFill><a:srgbClr val="${fill}"/></a:solidFill>` : '<a:noFill/>';
@@ -258,7 +259,9 @@ function shapeXml(n,id,unit,media){
     const face=esc(String(n.fontFamily||'Arial').split(',')[0].replace(/["']/g,''));
     const textLines=String(n.text||'').split(/\r?\n/);
     const leading=textLines.length>1?`<a:lnSpc><a:spcPts val="${Math.round(ptSize*1.14)}"/></a:lnSpc><a:spcBef><a:spcPts val="0"/></a:spcBef><a:spcAft><a:spcPts val="0"/></a:spcAft>`:'';
-    const paragraphs=textLines.map(line=>`<a:p><a:pPr algn="${n.anchor==='middle'?'ctr':n.anchor==='end'?'r':'l'}">${leading}</a:pPr><a:r><a:rPr lang="en-US" sz="${ptSize}" b="${n.bold?1:0}" i="${n.italic?1:0}"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="${face}"/></a:rPr><a:t>${esc(line)}</a:t></a:r><a:endParaRPr lang="en-US"/></a:p>`).join('');
+    const paragraphs=(n.runs || n.underline !== undefined || n.baselineShift !== undefined || n.lineSpacing !== undefined)
+      ? richTextParagraphs(n,unit)
+      : textLines.map(line=>`<a:p><a:pPr algn="${n.anchor==='middle'?'ctr':n.anchor==='end'?'r':'l'}">${leading}</a:pPr><a:r><a:rPr lang="en-US" sz="${ptSize}" b="${n.bold?1:0}" i="${n.italic?1:0}"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="${face}"/></a:rPr><a:t>${esc(line)}</a:t></a:r><a:endParaRPr lang="en-US"/></a:p>`).join('');
     const tx=`<p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="${n.verticalAlign==='middle'?'ctr':'t'}"/><a:lstStyle/>${paragraphs}</p:txBody>`;
     const rotation=Number.isFinite(Number(n.rotation))?` rot="${Math.round(num(n.rotation)*60000)}"`:'';
     return `<p:sp>${nv}<p:spPr><a:xfrm${rotation}><a:off x="${Math.round(x*unit)}" y="${Math.round(y*unit)}"/><a:ext cx="${Math.max(1,Math.round(w*unit))}" cy="${Math.max(1,Math.round(h*unit))}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr>${tx}</p:sp>`;

@@ -9,6 +9,7 @@ import zipfile
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from image_provenance import decode_image, embedded_image, open_image, pixel_digest, validate_resources
+from audit_styles import audit_text, audit_gradient
 
 NS = {"p": "http://schemas.openxmlformats.org/presentationml/2006/main",
       "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
@@ -82,6 +83,8 @@ def audit(pptx, scene_path, source_path=None):
                 if actual != node["text"].replace("\r\n", "\n"):
                     errors.append(node["id"] + ": text differs")
                 texts.append(actual)
+                errors.extend(audit_text(obj, node, unit))
+            errors.extend(audit_gradient(obj, node))
             transform = obj.find("p:spPr/a:xfrm", NS)
             expected_rotation = math.floor(float(node.get("rotation", 0)) * 60000 + .5) % 21600000
             actual_rotation = int(transform.get("rot", "0")) % 21600000 if transform is not None else 0
@@ -123,6 +126,9 @@ def audit(pptx, scene_path, source_path=None):
     return {"passed": not errors, "errors": errors, "objectCount": len(objects),
             "textBoxes": len(texts), "nativeShapes": len(objects) - images, "images": images,
             "arrows": arrows, "arrowheads": arrowheads, "verifiedImagePixels": verified_images,
+            "verifiedTextStyles": len(texts) if not errors else None,
+            "richTextBoxes": sum(n["type"] == "text" and "runs" in n for n in expected),
+            "gradientShapes": sum("gradient" in n for n in expected),
             "verifiedSourceAssets": verified_assets,
             "originalSourceChecked": source_path is not None and bool(scene.get("sourceAssets")),
             "originalSourceVerifiedAssets": verified_assets if source is not None else 0,

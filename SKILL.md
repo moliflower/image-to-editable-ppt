@@ -37,14 +37,15 @@ Reconstruct the supplied figure as a one-slide PPTX in its original aspect ratio
 
 ## Editability contract
 
-- Text is native PowerPoint text, not outlines or image patches. Use separate text nodes for mixed formatting where necessary. Ordinary labels remain whole text boxes.
+- Text is native PowerPoint text, not outlines or image patches. Keep each ordinary label in one text box. Use `runs` for mixed fonts, colors, bold/italic/underline, and `baselineShift: "super" / "sub"` for scientific indices; concatenated run text must equal the node's `text`. Set smaller index sizes explicitly when the reference needs them. These are editable text runs, not native equation objects. See the [scientific text example](examples/scientific-text.scene.json).
 - Rectangles, ellipses, polygons, lines, and curves are native DrawingML shapes. A connector drawn as a path is editable but is not automatically attached to adjacent modules. Do not promise automatic rerouting.
 - Each arrow is a separate line/path node. `arrow` adds its end head, `arrowStart` its start head; use both for a bidirectional connection. `dash: [on, off, ...]` preserves source-pixel dash lengths. Preserve direction and branch topology.
 - All supported shapes, paths, text and images accept `rotation` in clockwise degrees about their layout frame. Review rotated bounds and clipping. Export keeps explicit text sizes and line breaks; it performs no browser Canvas measurement or automatic font fitting.
 - Use explicit fill/stroke colors or "none". Complex image regions require assetPurpose and are reported in the audit.
+- Linear gradients remain native fills; ordered stops can include `opacity` from 0 to 1. Text styling, stop positions/colors/opacity and gradient angles are verified independently. Unsupported run or gradient properties fail export instead of being silently dropped. Use explicit `lineSpacing` in source pixels when measured line spacing matters; never shrink text to hide overflow.
 - Do not insert the whole reference as a slide background, overlay invisible text, or silently replace hard-to-rebuild modules with image crops.
 - Reconstructing a chart as shapes does not recover its data. Mathematical symbols in text boxes are not native PowerPoint equations. Explain these distinctions when relevant.
-- The audit checks source-asset bindings, embedded image pixels, rotation, arrow ends and dash spacing. `--source` additionally checks declared crops against the original image. A complete declared crop inventory is still the assistant's responsibility; pixel checks do not establish that every photo in an image was inventoried, or that foreground objects do not cover it.
+- The audit checks source-asset bindings, embedded image pixels, rotation, arrow ends, dash spacing, text run formatting, and gradients. `--source` additionally checks declared crops against the original image. A complete declared crop inventory is still the assistant's responsibility; pixel checks do not establish that every photo in an image was inventoried, or that foreground objects do not cover it. Font declarations do not prove the font is installed; inspect actual PowerPoint rendering.
 - Match the reference's layout instead of applying generic slide templates, cover pages, or minimum deck font-size rules.
 
 For revisions, change the retained scene, regenerate, and compare again. If the user edited the PPTX, inspect that file before regenerating from an older scene.

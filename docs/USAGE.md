@@ -147,6 +147,15 @@ See the [scene schema](../references/scene-schema.md) for normalized dash inputs
 
 ## Render with Microsoft PowerPoint
 
+For mixed-format scientific labels, use `runs` within one text node. Run text must concatenate exactly to the node's `text`; font/color/emphasis inherit from the node, and `baselineShift` selects `super`/`sub` without shrinking the declared size. Optional `lineSpacing` uses source pixels. Gradient stops can include `opacity` from 0 to 1.
+
+```bash
+node scripts/export_pptx.mjs --scene examples/scientific-text.scene.json --output build/scientific-text.pptx
+python -X utf8 scripts/audit_pptx.py --pptx build/scientific-text.pptx --scene build/scientific-text.exported.scene.json
+```
+
+The audit checks native run styles and gradient values, including intentional package-corruption cases in the test suite. See [schema examples](../references/scene-schema.md#scientific-text-within-one-editable-box) and the [rendered demo](../examples/scientific-text/README.md). Actual rendering is still needed to verify font availability and visual fit.
+
 On Windows with desktop PowerPoint installed:
 
 ```powershell

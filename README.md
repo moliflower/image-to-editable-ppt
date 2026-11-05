@@ -85,6 +85,16 @@ When all you have is a screenshot, a paper figure, or an old architecture image,
 
 The local exporter supports **bidirectional arrows, custom dash spacing, and rotation of shapes, paths, and images**. New photo crops retain source coordinates and pixel digests; the audit can verify them against the original image. Explicit fonts and sizes remain under your control, with no browser Canvas dependency. See the [native capability example](examples/native-capabilities.scene.json) and [scene schema](references/scene-schema.md).
 
+### Scientific text stays together
+
+Keep mixed colors, fonts, emphasis, and **superscripts/subscripts inside one editable text box**. Linear gradients support transparent color stops. The independent audit verifies the saved font sizes, typefaces, baseline offsets and gradient values, alongside geometry and image provenance.
+
+![Original capability demo rendered by Microsoft PowerPoint: mixed-format scientific labels and a transparent native gradient](examples/scientific-text/preview.png)
+
+[Download the editable demo](examples/scientific-text/editable.pptx?raw=true) · [Scene and verification notes](examples/scientific-text/README.md) · [Related-project code review](references/related-projects.md)
+
+This original capability demo has 18 native objects, including 12 text boxes. It demonstrates editable text indices, not native equation objects. It is separate from the public SAM 2 reconstruction above.
+
 Designed for scientific method figures, model architectures, flowcharts, and diagrams built from text and geometric elements. The agent interprets the image and authors a scene JSON. The CLI exports that scene; it is not a standalone image-to-OCR command.
 
 <a id="quick-start"></a>

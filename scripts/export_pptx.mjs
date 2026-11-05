@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildNativePptx, expandEditableTextPaths, geometrySegments } from '../vendor/figureforge/editable-native.mjs';
 import { dashPattern, rotatedBounds, validateSourceAssets } from './scene_geometry.mjs';
+import { normalizedText, validateText } from './scene_text.mjs';
 
 const base = path.dirname(fileURLToPath(import.meta.url));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -41,10 +42,15 @@ export function validateScene(scene) {
       if ((dash || n.arrow || n.arrowStart) && (!n.stroke || n.stroke === 'none')) errors.push(id + ': dash/arrow needs a visible stroke');
     } catch (e) { errors.push(id + ': ' + e.message); }
     if (n.gradient !== undefined) {
+      if (!['rect', 'ellipse', 'path', 'polyline'].includes(n.type)) errors.push(id + ': gradient requires a fillable geometric shape');
       if (!finite(n.gradient?.angle) || !Array.isArray(n.gradient?.stops) || n.gradient.stops.length < 2 ||
-          n.gradient.stops.some(s => !finite(s.offset) || s.offset < 0 || s.offset > 1 || !color(s.color) || s.color === 'none'))
+          n.gradient.stops.some((s,i,stops) => !s || !finite(s.offset) || s.offset < 0 || s.offset > 1 || !color(s.color) || s.color === 'none' ||
+            (s.opacity !== undefined && (!finite(s.opacity) || s.opacity < 0 || s.opacity > 1)) || (i > 0 && s.offset < stops[i-1]?.offset)))
         errors.push(id + ': invalid gradient');
+      if (n.gradient && Object.keys(n.gradient).some(k => !['angle','stops'].includes(k))) errors.push(id + ': unsupported gradient property');
+      if (Array.isArray(n.gradient?.stops) && n.gradient.stops.some(s => s && Object.keys(s).some(k => !['offset','color','opacity'].includes(k)))) errors.push(id + ': unsupported gradient stop property');
     }
+    if (n.type !== 'text' && ['runs','baselineShift','underline','lineSpacing'].some(k => n[k] !== undefined)) errors.push(id + ': text styling requires a text node');
     let bounds;
     if (['text', 'rect', 'ellipse', 'image'].includes(n.type)) {
       for (const k of ['x', 'y', 'w', 'h']) if (!finite(n[k])) errors.push(id + ': ' + k + ' must be numeric');
@@ -66,13 +72,15 @@ export function validateScene(scene) {
     if (bounds && (bounds[0] < -1 || bounds[1] < -1 || bounds[2] > c.width + 1 || bounds[3] > c.height + 1))
       warnings.push(id + ': geometry extends outside the canvas; review clipping');
     if (n.type === 'text') {
+      errors.push(...validateText(n, c.width));
       if (typeof n.text !== 'string' || !n.text.trim()) errors.push(id + ': text is empty');
       if (typeof n.text === 'string' && /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(n.text)) errors.push(id + ': text contains invalid XML control characters');
       if (!finite(n.fontSize) || n.fontSize <= 0) errors.push(id + ': fontSize must be positive');
       if (!['start', 'middle', 'end', undefined].includes(n.anchor)) errors.push(id + ': invalid anchor');
       if (n.fill === 'none') errors.push(id + ': invisible text is not allowed');
       const lines = String(n.text || '').split(/\r?\n/).length;
-      if (n.h < n.fontSize * 1.25 * lines) warnings.push(id + ': text box may be too short for the declared font and line count');
+      const largest = Math.max(n.fontSize, ...(Array.isArray(n.runs) ? n.runs.map(r => r?.fontSize || n.fontSize) : []));
+      if (n.h < largest * 1.25 + (lines-1) * (n.lineSpacing || largest*1.25)) warnings.push(id + ': text box may be too short for the declared font and line count');
     }
     if (n.type === 'image') {
       if (!['photo', 'texture', 'logo', 'complex-artwork'].includes(n.assetPurpose)) errors.push(id + ': image needs assetPurpose');
@@ -165,6 +173,10 @@ export async function exportScene(input, output, sceneDirectory = process.cwd())
     if (n.crop) throw new Error(n.id + ': run image_assets.py prepare before exporting crop nodes');
     if (n.type === 'text') {
       n.fontFamily ||= 'Times New Roman'; n.fill ??= '#000000';
+      const errors = validateText(n, scene.canvas?.width);
+      if (errors.length) throw new Error(errors.join('\n'));
+      if (typeof n.text === 'string') n.text = normalizedText(n.text);
+      if (n.runs) for (const run of n.runs) run.text = normalizedText(run.text);
     } else { n.fill ??= 'none'; n.stroke ??= 'none'; }
   }
   const normalized = expandEditableTextPaths(scene);
@@ -189,6 +201,8 @@ export async function exportScene(input, output, sceneDirectory = process.cwd())
     arrows: normalized.nodes.filter(n => n.arrow || n.arrowStart).length,
     arrowheads: normalized.nodes.reduce((sum,n)=>sum+Number(!!n.arrow)+Number(!!n.arrowStart),0),
     sourceAssets: normalized.sourceAssets?.length || 0,
+    richTextBoxes: normalized.nodes.filter(n => n.type === 'text' && n.runs).length,
+    gradientShapes: normalized.nodes.filter(n => n.gradient).length,
     imageRegions: normalized.nodes.filter(n => n.type === 'image').map(n => ({ id: n.id, purpose: n.assetPurpose, description: n.assetDescription || '' })),
     warnings, reviewNotes: normalized.reviewNotes || [],
     upstreamRevision: 'dbf360a533ee46bc7d4a8f6037717c83f21a633a',

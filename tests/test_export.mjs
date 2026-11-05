@@ -8,6 +8,7 @@ import { rotatedBounds } from '../scripts/scene_geometry.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixture = JSON.parse(await fs.readFile(path.join(root, 'examples/diagram.scene.json'), 'utf8'));
+const scientific = JSON.parse(await fs.readFile(path.join(root, 'examples/scientific-text.scene.json'), 'utf8'));
 function member(bytes, wanted) {
   let at = 0;
   while (bytes.readUInt32LE(at) === 0x04034b50) {
@@ -19,6 +20,68 @@ function member(bytes, wanted) {
   }
   throw new Error('Missing ZIP member: ' + wanted);
 }
+
+test('scientific labels keep native runs, baselines and gradient opacity without splitting text boxes', async () => {
+  await fs.mkdir(path.join(root, 'build'), {recursive:true});
+  const dir = await fs.mkdtemp(path.join(root, 'build', 'text-test-'));
+  try {
+    const out = path.join(dir, 'figure.pptx');
+    const result = await exportScene(scientific, out);
+    const xml = member(await fs.readFile(out), 'ppt/slides/slide1.xml');
+    assert.equal(result.objectCount, scientific.nodes.length);
+    assert.equal(result.richTextBoxes, 3);
+    assert.equal(result.gradientShapes, 1);
+    assert.equal((xml.match(/<p:txBody>/g) || []).length, scientific.nodes.filter(n=>n.type==='text').length);
+    assert.match(xml, /baseline="-25000"/);
+    assert.match(xml, /baseline="30000"/);
+    assert.match(xml, /u="sng"/);
+    assert.match(xml, /<a:alpha val="5000"\/>/);
+    assert.match(xml, /<a:spcPts val="1800"\/>/);
+    assert.doesNotMatch(xml, /<p:pic>|normAutofit|spAutoFit/);
+  } finally { await fs.rm(dir, {recursive:true, force:true}); }
+});
+
+test('rich runs preserve whitespace, explicit style overrides, Unicode and paragraph boundaries', async () => {
+  const scene={canvas:{width:1000,height:600},nodes:[{id:'label',type:'text',x:20,y:20,w:900,h:260,
+    text:'  A<&>\n\n中文 x2  ',fontSize:30,fontFamily:'Times New Roman',bold:true,italic:true,fill:'#123',
+    runs:[{text:'  A<&>\r\n\r\n',bold:false},{text:'中文 ',fontFamily:'Microsoft YaHei',italic:false},
+      {text:'x',underline:true},{text:'2',fontSize:20,baselineShift:'super'},{text:'  '}]}]};
+  const dir=await fs.mkdtemp(path.join(root,'build','run-test-'));
+  try {
+    const result=await exportScene(scene,path.join(dir,'runs.pptx'));
+    const xml=member(await fs.readFile(result.output),'ppt/slides/slide1.xml');
+    assert.equal((xml.match(/<a:p>/g)||[]).length,3);
+    assert.match(xml, /<a:t xml:space="preserve">  A&lt;&amp;&gt;<\/a:t>/);
+    assert.match(xml, /sz="2160" b="0" i="1"/);
+    assert.match(xml, /sz="2160" b="1" i="0"/);
+    assert.match(xml, /<a:ea typeface="Microsoft YaHei"\/>/);
+    const normalized=JSON.parse(await fs.readFile(path.join(dir,'runs.exported.scene.json')));
+    assert.equal(normalized.nodes[0].runs.map(r=>r.text).join(''),normalized.nodes[0].text);
+  } finally {await fs.rm(dir,{recursive:true,force:true});}
+});
+
+test('unsupported or lossy text and gradient declarations fail before export', async () => {
+  for(const patch of [
+    {runs:[]},{runs:[{text:'wrong'}]},{runs:[{text:'x',fontSize:'18'}]},
+    {runs:[{text:'x',bold:'false'}]},{runs:[{text:'x',fill:'none'}]},
+    {runs:[{text:'x',baselineShift:'sup'}]},{runs:[{text:'x',fontstyle:'italic'}]},
+    {runs:[{text:'x'}],textPath:{d:'M0 0 L100 0'}},
+    {lineSpacing:0},{underline:'yes'},{fontSize:0.1},{verticalAlign:'bottom'}]) {
+    const scene={canvas:{width:1000,height:600},nodes:[{id:'x',type:'text',x:0,y:0,w:200,h:60,text:'x',fontSize:20,...patch}]};
+    assert.throws(()=>validateScene(scene));
+    await assert.rejects(exportScene(scene,path.join(root,'build','must-not-exist.pptx')));
+  }
+  for(const gradient of [
+    {angle:0,stops:[null,null]},
+    {angle:0,stops:[{offset:1,color:'#fff'},{offset:0,color:'#000'}]},
+    {angle:0,stops:[{offset:0,color:'#fff',opacity:-0.1},{offset:1,color:'#000'}]},
+    {type:'radial',angle:0,stops:[{offset:0,color:'#fff'},{offset:1,color:'#000'}]}]) {
+    assert.throws(()=>validateScene({canvas:{width:1000,height:600},nodes:[{id:'g',type:'rect',x:0,y:0,w:200,h:60,gradient}]}));
+  }
+  const scene=structuredClone(fixture);
+  scene.nodes[0].gradient={angle:0,stops:[{offset:0,color:'#fff'},{offset:1,color:'#000'}]};
+  assert.throws(()=>validateScene(scene),/fillable/);
+});
 
 test('exports native bilingual text, separate paths, arrowheads and valid geometry', async () => {
   await fs.mkdir(path.join(root, 'build'), { recursive: true });
