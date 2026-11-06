@@ -47,6 +47,22 @@
 
 </details>
 
+### RepoMaster：树结构、依赖图与循环流程
+
+**RepoMaster · NeurIPS 2025。** 第二个案例展示代码树、依赖图、对话气泡和循环工作流的混合布局。下图同样由实际可编辑 PowerPoint 文件渲染得到。
+
+[![RepoMaster 总览图：重建为可编辑 PowerPoint 对象](examples/repomaster/preview.png)](examples/repomaster/editable.pptx?raw=true)
+
+<div align="center">
+
+**[下载可编辑 PPTX](examples/repomaster/editable.pptx?raw=true)** · [原始图片](examples/repomaster/reference.png) · [场景 JSON](examples/repomaster/scene.json) · [核验记录](examples/repomaster/verification.json)
+
+**353 个独立对象 · 337 个原生对象 · 16 个插画与图标裁片**
+
+</div>
+
+文字、图节点、模块与连接路径均可编辑；复杂吉祥物和标志保留为独立图片。环形标签由旋转文字字符组成。改编自 **Wang 等人的 [RepoMaster](https://arxiv.org/abs/2505.21577) 论文 Figure 1**。参见[重建与来源说明](examples/repomaster/README.md)。
+
 <details>
 <summary><strong>查看真实 PowerPoint 编辑动图 · SAM 2</strong></summary>
 
@@ -256,7 +272,7 @@ python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --out
 | [使用指南](docs/USAGE.zh-CN.md) | 安装、更新、场景导出、图片裁片、PowerPoint 渲染、故障排查 |
 | [技能指令](SKILL.md) | 智能体执行的完整重建与核验流程 |
 | [场景格式](references/scene-schema.md) | 对象类型、像素坐标、字体、路径与图片嵌入 |
-| [案例说明](examples/sam2/README.md) | 复杂图的输入范围、可编辑范围与真实文件统计 |
+| [PosDiffNet](examples/posdiffnet/README.md) · [RepoMaster](examples/repomaster/README.md) · [SAM 2](examples/sam2/README.md) | 输入范围、可编辑范围与真实文件统计 |
 | [贡献指南](CONTRIBUTING.md) | 复现问题、提交示例、修改脚本与验证要求 |
 | [上游与适配](references/UPSTREAM.md) | FigureForge 固定版本、复用范围与许可说明 |
 
@@ -266,4 +282,4 @@ python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --out
 
 原生 PPTX 导出能力基于 [Top-Conf Figure Gallery / FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery)。项目保留其版权与 MIT 许可证，固定版本与适配细节见 [UPSTREAM.md](references/UPSTREAM.md)。
 
-技能指令和封装代码采用 [MIT License](LICENSE)。上游组件的许可证位于 [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE)。示例图中的照片与其他源素材权利归各自权利人；代码许可不替代源素材的使用授权，详见[案例说明](examples/sam2/README.md#asset-notes)。
+技能指令和封装代码采用 [MIT License](LICENSE)。上游组件的许可证位于 [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE)。示例图中的照片、插画与其他源素材权利归各自权利人；代码许可不替代源素材的使用授权，详见 [PosDiffNet](examples/posdiffnet/SOURCE.md)、[RepoMaster](examples/repomaster/SOURCE.md) 和 [SAM 2](examples/sam2/README.md#asset-notes) 的来源说明。

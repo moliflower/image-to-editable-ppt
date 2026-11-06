@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-06",
+  "source": {
+    "paper": "RepoMaster",
+    "figure": 1,
+    "arxiv": "2505.21577",
+    "referenceSha256": "9813895c3eceff33008147867972c04a3829be5b70a2140e2c538d9d4bc16872",
+    "rights": "Original artwork excluded from repository MIT license; see SOURCE.md",
+    "input": "User-supplied PNG, caption excluded; no imported source vectors or text objects"
+  },
+  "output": {
+    "file": "editable.pptx",
+    "sha256": "59a277430d5686505036e166ae69bd0dad2291e7157da7459c8fc148d9023cd8"
+  },
+  "audit": {
+    "passed": true,
+    "errors": [],
+    "objectCount": 353,
+    "textBoxes": 55,
+    "nativeShapes": 337,
+    "images": 16,
+    "arrows": 11,
+    "arrowheads": 11,
+    "verifiedImagePixels": 16,
+    "verifiedTextStyles": 55,
+    "richTextBoxes": 1,
+    "gradientShapes": 0,
+    "verifiedSourceAssets": 16,
+    "originalSourceChecked": true,
+    "originalSourceVerifiedAssets": 16,
+    "imagesWithoutSourceProvenance": 0,
+    "visualVerification": "not-performed-by-this-audit"
+  },
+  "visualVerification": {
+    "renderer": "Microsoft PowerPoint",
+    "preview": "preview.png",
+    "previewSha256": "e73bb6b39826f790f84e32441cd32dcaa5990c6c808bc4acb95d458ea3f6cf68",
+    "dimensions": [
+      1836,
+      1218
+    ],
+    "reviewed": true,
+    "method": "Actual rendered PNG compared with the supplied raster; no Computer Use",
+    "checked": [
+      "section layout and ordering",
+      "label visibility",
+      "major arrow routes",
+      "tree/graph structure",
+      "all 16 source-image crops"
+    ],
+    "differences": [
+      "Gabriola approximates the handwritten title font",
+      "Curved labels are separately rotated characters",
+      "Freehand borders and minor symbols are approximations"
+    ],
+    "resolvedIssues": [
+      "Initial-components label/graph overlap",
+      "Search arrow obscured by panel background",
+      "Label clearance inside bands"
+    ]
+  },
+  "warnings": [],
+  "scope": "File-specific checks; not a general recognition benchmark."
+}

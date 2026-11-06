@@ -47,6 +47,22 @@ The scene was authored against a clear raster of the public paper figure. No PDF
 
 </details>
 
+### RepoMaster: trees, graphs and an execution loop
+
+**RepoMaster · NeurIPS 2025.** A second layout with repository trees, dependency graphs, speech bubbles and a circular workflow. This preview is also rendered from the editable PowerPoint file.
+
+[![RepoMaster overview reconstructed as editable PowerPoint objects](examples/repomaster/preview.png)](examples/repomaster/editable.pptx?raw=true)
+
+<div align="center">
+
+**[Download editable PPTX](examples/repomaster/editable.pptx?raw=true)** · [Original figure](examples/repomaster/reference.png) · [Scene JSON](examples/repomaster/scene.json) · [Verification](examples/repomaster/verification.json)
+
+**353 objects · 337 native objects · 16 artwork crops**
+
+</div>
+
+Text, graph nodes, modules and routes stay editable; complex mascots and logos remain separate images. Curved labels use rotated text characters. Adapted from **Figure 1 of [RepoMaster](https://arxiv.org/abs/2505.21577), Wang et al.** [Reconstruction and source notes](examples/repomaster/README.md).
+
 <details>
 <summary><strong>Watch actual PowerPoint editing · SAM 2</strong></summary>
 
@@ -196,4 +212,4 @@ Report problems through [Issues](https://github.com/moliflower/image-to-editable
 
 Native PPTX export is based on [Top-Conf Figure Gallery / FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery). Its original copyright and MIT license are retained in [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE).
 
-Skill instructions and wrapper code use the [MIT License](LICENSE). The public SAM 2 reference and its adapted example retain [Apache-2.0 source attribution and licensing](examples/sam2/README.md#source).
+Skill instructions and wrapper code use the [MIT License](LICENSE). The public SAM 2 reference and its adapted example retain [Apache-2.0 source attribution and licensing](examples/sam2/README.md#source). PosDiffNet and RepoMaster artwork retain their original rights and are excluded from the code license; see their [PosDiffNet](examples/posdiffnet/SOURCE.md) and [RepoMaster](examples/repomaster/SOURCE.md) source notices.
