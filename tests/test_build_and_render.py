@@ -52,6 +52,16 @@ class BuildAndRenderTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "overwrite"):
                 build(out.with_suffix(".exported.scene.json"), out, source, renderer="none")
 
+    def test_clipping_warnings_survive_the_compact_build_report(self):
+        with tempfile.TemporaryDirectory(dir=BUILD) as folder:
+            folder = Path(folder)
+            scene = json.loads((ROOT / "examples/diagram.scene.json").read_text(encoding="utf-8"))
+            scene["nodes"][0]["x"] = -50
+            source = folder / "scene.json"
+            source.write_text(json.dumps(scene), encoding="utf-8")
+            result = build(source, folder / "figure.pptx", renderer="none")
+            self.assertTrue(any("outside the canvas" in warning for warning in result["warnings"]))
+
     def test_fallback_and_cache_invalidation_verify_current_bytes(self):
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:
             folder = Path(folder)
@@ -107,4 +117,3 @@ class BuildAndRenderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

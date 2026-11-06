@@ -39,7 +39,7 @@ def build(scene, output, source=None, renderer="auto", width=1600, force_render=
         export_scene = files["prepared"]
     timings["prepare"] = round(time.perf_counter() - start, 3)
     at = time.perf_counter()
-    run_command([node, HERE / "export_pptx.mjs", "--scene", export_scene, "--output", output])
+    exported = json.loads(run_command([node, HERE / "export_pptx.mjs", "--scene", export_scene, "--output", output]))
     timings["export"] = round(time.perf_counter() - at, 3)
     at = time.perf_counter()
     normalized = json.loads(files["normalized"].read_text(encoding="utf-8"))
@@ -57,6 +57,7 @@ def build(scene, output, source=None, renderer="auto", width=1600, force_render=
     timings["total"] = round(time.perf_counter() - start, 3)
     result = {"output": str(output), "auditPassed": checked["passed"], "objectCount": checked["objectCount"],
               "textBoxes": checked["textBoxes"], "images": checked["images"], "errors": checked["errors"],
+              "warnings": exported.get("warnings", []), "reviewNotes": exported.get("reviewNotes", []),
               "render": preview, "timingsSeconds": timings, "visualReview": "pending"}
     files["build"].write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return result
@@ -75,6 +76,7 @@ def main():
     preview = result["render"]
     print(json.dumps({"output": result["output"], "auditPassed": result["auditPassed"],
                       "objects": result["objectCount"], "textBoxes": result["textBoxes"], "images": result["images"],
+                      "warningCount": len(result["warnings"]), "warnings": result["warnings"][:8],
                       "render": {k: preview[k] for k in ("status", "renderer", "preview", "cacheHit", "reason", "attempts") if k in preview},
                       "timingsSeconds": result["timingsSeconds"], "visualReview": "pending"}, ensure_ascii=False, indent=2))
     failed_render = preview["status"] == "failed" or (args.renderer not in ("auto", "none") and preview["status"] != "rendered")
