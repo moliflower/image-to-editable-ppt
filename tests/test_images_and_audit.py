@@ -41,7 +41,7 @@ class ImageAuditTests(unittest.TestCase):
             prepared = tmp / "prepared.json"
             original.write_text(json.dumps(scene), encoding="utf-8")
             assets.prepare(original, source, prepared)
-            node = json.loads(prepared.read_text())["nodes"][-1]
+            node = json.loads(prepared.read_text(encoding="utf-8"))["nodes"][-1]
             self.assertTrue(node["href"].startswith("data:image/png;base64,"))
             self.assertNotIn("crop", node)
             self.assertEqual(node["sourceCrop"], {"x": 20, "y": 30, "w": 120, "h": 80})
@@ -75,7 +75,7 @@ class ImageAuditTests(unittest.TestCase):
             photo={'id':'photo','type':'image','x':50,'y':500,'w':100,'h':70,'crop':{'x':10,'y':10,'w':100,'h':70},'assetPurpose':'photo'}
             scene['nodes'].append(photo); scene_path.write_text(json.dumps(scene))
             assets.prepare(scene_path,source,prepared)
-            good=json.loads(prepared.read_text())
+            good=json.loads(prepared.read_text(encoding="utf-8"))
             missing=copy.deepcopy(good); missing['nodes'].pop()
             scene_path.write_text(json.dumps(missing))
             with self.assertRaisesRegex(ValueError,'exactly one'):

@@ -5,47 +5,35 @@ description: Convert a supplied diagram, screenshot, or scientific figure into a
 
 # Image to editable PowerPoint
 
-Reconstruct the supplied figure as a one-slide PPTX in its original aspect ratio. Each label, module, and arrow must be independently selectable. Use the bundled FigureForge native DrawingML exporter, pinned in [UPSTREAM.md](references/UPSTREAM.md). The assistant performs image understanding in the current conversation; no separate vision API or API key is required.
+Reconstruct the supplied figure as one editable PPTX slide in its original aspect ratio. The current assistant understands the image; the bundled local exporter needs no separate vision API or key. Export and audit use Node.js 18+ and Python 3.10+/Pillow on Windows, macOS and Linux. The rendering backend is optional and selected separately; PowerShell is not a core dependency.
 
-## Typography and input boundaries
+## Default workflow
 
-- Use **Times New Roman** by default for English labels, titles, numerals, and mathematical text in reconstructed scientific figures. This is this skill's default convention, not a universal journal requirement. Explicit user, journal, or template font requirements override it; an explicit request to preserve the source typography also overrides it. Preserve the reference layout and relative type sizes when changing the font, and recheck spacing after native rendering.
-- Set fontFamily explicitly on text nodes. Use italic mathematical variables, upright operators and units, and the reference's bold emphasis. Use an installed fallback only for glyphs Times New Roman cannot display (for example Chinese or special symbols); disclose a material substitution.
-- When the user requests a **PNG-only / image-only** conversion, use only the supplied bitmap for recognition and measurement. Do not inspect neighboring draw.io, SVG, PDF, slide, code, or prior reconstructed scene files for the figure. Record the input boundary in scene.reviewNotes. If source-assisted reconstruction is permitted and used, say so rather than presenting it as a bitmap-only test.
+1. **Inspect once, resolve details early.** View the actual supplied image and obtain its EXIF-oriented dimensions (`python scripts/image_assets.py inspect reference.png`) if not already known. Identify text, modules, arrow directions, layering and photo regions. Batch detail crops for uncertain symbols or dense areas before authoring; avoid reopening unchanged full images. Preserve the original. For PNG-only requests, use only that bitmap, not neighboring SVG/PDF/draw.io/source files, and record this boundary in `reviewNotes`.
+2. **Build the scene.** Use source-pixel coordinates, stable meaningful IDs and back-to-front node order. Read [scene-schema.md](references/scene-schema.md) when the schema is unfamiliar or a needed field is unclear; reuse known conventions on subsequent figures. Keep ordinary labels in one native text box, using `runs` for mixed styles and indices. Use native shapes/paths for diagrams, charts and arrows. Only photos/complex artwork may remain image regions. Declare their crop inventory in `sourceAssets` when multiple regions must be accounted for. Record recognition uncertainty rather than guessing.
+3. **Build and check in one call.** Run the unified command below. It prepares declared crops only when needed, exports once, independently audits once, then renders the actual PPTX with an available backend. Keep generated files in the task directory. Inspect the short result; consult detailed sidecars only for warnings or failures.
 
-## Workflow
+   ```text
+   python -X utf8 "<skill>/scripts/build_figure.py" --scene "<build>/scene.json" --source "<reference.png>" --output "<output>/figure.pptx"
+   ```
 
-1. **Inspect the reference.** Obtain the actual local image, inspect it with the available image viewer, and read its dimensions with scripts/image_assets.py inspect. If an attachment has no accessible file, obtain it through the available file tools; ask for the file only when necessary. Preserve the original source.
-2. **Inventory and measure.** Identify labels, containers, shapes, arrow endpoints, routing, layers, and photographic regions. Use source-image pixel coordinates. Zoom into dense regions with image_assets.py crop; keep crop offsets when mapping measurements to the full image. Preserve wording, capitalization, symbols, line breaks, colors, and layout. Record uncertain text or missing details in scene.reviewNotes; do not invent them.
-3. **Create a scene.** Read [scene-schema.md](references/scene-schema.md), then write a JSON scene in the task's private build directory. Every object needs a stable, meaningful ID. Each label must be a text node and each independently editable module/arrow a separate node. Array order is back-to-front. Photos and complex artwork may use declared image crops; diagram modules, labels, and arrows must not be flattened into those crops. For figures with multiple photo/heatmap regions, record the expected crops in `sourceAssets` and bind each image using `sourceAssetId` so missing or duplicated regions can be detected.
-4. **Materialize crops when needed.** Use image_assets.py prepare with --scene, --source, and --output to embed declared photographic/artwork crops. It also handles EXIF orientation and retains source-crop coordinates and pixel hashes in a resource manifest. Use integer crop coordinates. All scene coordinates refer to the EXIF-oriented image. Keep the source canvas size unchanged. Keep the generated provenance when revising placement or rotation; do not regenerate a manifest merely to hide a missing image.
-5. **Export and audit.** Run the bundled exporter, followed by the independent package audit. The exporter is local, has no npm dependencies, and makes no network requests. Use Node 18+ and Python 3 with Pillow; use load_workspace_dependencies if runtime paths are missing.
+   `--source` is required for crop preparation and useful for independent provenance checks; omit it for a scene with no source crops. `--renderer auto` prefers installed PowerPoint on Windows, otherwise LibreOffice with Poppler on any supported OS. See [rendering.md](references/rendering.md) only for setup, troubleshooting or explicit backend selection. Discover bundled runtime paths only when existing Python/Node paths are missing.
+4. **Review and deliver.** Inspect the rendered preview against the reference, including unresolved small labels. Check wording, topology, clipping, overlaps, font metrics and photos. Correct detected defects in the scene and rebuild once per coherent set of changes; review changed areas plus overall layout. Deliver PPTX and preview, retaining scene JSON for revisions. Disclose unresolved recognition and regions that remain images. If no renderer exists, deliver the editable file and state that visual verification is incomplete. A scene preview is not a render of the PPTX.
 
-   ~~~powershell
-   node "<skill>/scripts/export_pptx.mjs" --scene "<build>/scene.json" --output "<output>/figure.pptx"
-   python -X utf8 "<skill>/scripts/audit_pptx.py" --pptx "<output>/figure.pptx" --scene "<output>/figure.exported.scene.json" --source "<reference.png>" --report "<build>/audit.json"
-   ~~~
+## Quality without redundant work
 
-6. **Render and compare.** On Windows with PowerPoint, run the bundled renderer. It opens only the generated file without a presentation window and does not quit PowerPoint if an existing presentation remains open. Inspect the actual PNG alongside the reference, including small-label close-ups. Check wording, objects, arrow directions, overlaps, clipping, type sizes, and crop boundaries. Correct the scene and rerun export/audit/render until detected defects are resolved.
+- Keep one independent package audit and one visual review for each changed final PPTX. Passing structural checks does not establish visual fidelity.
+- Reuse a preview only when the renderer's cache confirms matching PPTX bytes, width, backend and preview hash. Font/environment changes require `--force-render`. Cached rendering still needs visual review; the script never marks that review complete.
+- Do not run edit probes, repository-wide tests, example regressions, repeated installation checks or both Office renderers for every user figure. Those are toolchain maintenance checks, needed after exporter/backend changes or a specific suspected failure. Ordinary reconstruction uses the existing tested toolchain.
+- Do not reread the complete skill, generic slide-design guidance or already-understood schema on every correction. A supplied scientific figure determines composition, text size and slide count.
+- For revisions, change the retained scene; if the user edited the PPTX, inspect that file before regenerating from an older scene. Do not overwrite the user's edits from stale scene data.
 
-   ~~~powershell
-   powershell -NoProfile -File "<skill>/scripts/render_powerpoint.ps1" -InputPptx "<output>/figure.pptx" -OutputPng "<build>/figure.png" -Width 1600
-   ~~~
+## Typography and editability
 
-   If PowerPoint is unavailable, use an available PPTX renderer such as LibreOffice or presentation tools. A scene preview does not verify PowerPoint rendering. If no renderer is usable, deliver the editable file with a note that visual verification remains incomplete. Failed fidelity checks require correction or disclosure, not a bitmap-only replacement.
-7. **Deliver.** Return the PPTX and a preview. State material recognition uncertainties and any regions that remain images. Keep build/audit files private unless useful or requested. Retain the scene JSON beside the output for revisions; do not require the user to edit JSON.
+- English scientific labels, numerals and math default to Times New Roman; explicit user/journal/template/source-font instructions override it. Set `fontFamily` explicitly. Use installed fallbacks for missing glyphs/fonts and disclose material substitutions. Use upright operators/units, italic variables, and the reference's emphasis. Do not assume Windows fonts exist on Linux or macOS.
+- Preserve explicit sizes and line breaks; no browser Canvas measurement or automatic font fitting. `runs` retain one editable box; `baselineShift: "super" / "sub"` keeps native text indices with explicit sizes. They are not native equation objects.
+- Keep text, modules and arrows individually editable. Never insert the whole reference as a background, overlay invisible text or flatten diagram content into image crops. Reconstructed chart shapes do not recover source data.
+- Paths are native editable geometry but are not automatically attached to modules. Preserve arrow direction and topology. Geometry, rich text, gradients, dashes, rotation and image provenance are specified in the [schema](references/scene-schema.md); the audit checks their supported OOXML declarations.
+- A complete photo inventory and correct layering remain the assistant's responsibility. Source-pixel checks cannot prove that an undeclared photo was recognized or that another object does not cover it.
 
-## Editability contract
-
-- Text is native PowerPoint text, not outlines or image patches. Keep each ordinary label in one text box. Use `runs` for mixed fonts, colors, bold/italic/underline, and `baselineShift: "super" / "sub"` for scientific indices; concatenated run text must equal the node's `text`. Set smaller index sizes explicitly when the reference needs them. These are editable text runs, not native equation objects. See the [scientific text example](examples/scientific-text.scene.json).
-- Rectangles, ellipses, polygons, lines, and curves are native DrawingML shapes. A connector drawn as a path is editable but is not automatically attached to adjacent modules. Do not promise automatic rerouting.
-- Each arrow is a separate line/path node. `arrow` adds its end head, `arrowStart` its start head; use both for a bidirectional connection. `dash: [on, off, ...]` preserves source-pixel dash lengths. Preserve direction and branch topology.
-- All supported shapes, paths, text and images accept `rotation` in clockwise degrees about their layout frame. Review rotated bounds and clipping. Export keeps explicit text sizes and line breaks; it performs no browser Canvas measurement or automatic font fitting.
-- Use explicit fill/stroke colors or "none". Complex image regions require assetPurpose and are reported in the audit.
-- Linear gradients remain native fills; ordered stops can include `opacity` from 0 to 1. Text styling, stop positions/colors/opacity and gradient angles are verified independently. Unsupported run or gradient properties fail export instead of being silently dropped. Use explicit `lineSpacing` in source pixels when measured line spacing matters; never shrink text to hide overflow.
-- Do not insert the whole reference as a slide background, overlay invisible text, or silently replace hard-to-rebuild modules with image crops.
-- Reconstructing a chart as shapes does not recover its data. Mathematical symbols in text boxes are not native PowerPoint equations. Explain these distinctions when relevant.
-- The audit checks source-asset bindings, embedded image pixels, rotation, arrow ends, dash spacing, text run formatting, and gradients. `--source` additionally checks declared crops against the original image. A complete declared crop inventory is still the assistant's responsibility; pixel checks do not establish that every photo in an image was inventoried, or that foreground objects do not cover it. Font declarations do not prove the font is installed; inspect actual PowerPoint rendering.
-- Match the reference's layout instead of applying generic slide templates, cover pages, or minimum deck font-size rules.
-
-For revisions, change the retained scene, regenerate, and compare again. If the user edited the PPTX, inspect that file before regenerating from an older scene.
+The bundled exporter and adaptation provenance are documented in [UPSTREAM.md](references/UPSTREAM.md).

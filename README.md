@@ -106,7 +106,8 @@ Designed for scientific method figures, model architectures, flowcharts, and dia
 - A vision-capable agent with skill support for image interpretation.
 - **Node.js 18+** for PPTX export.
 - **Python 3.10+ and Pillow** for image crops and the independent audit workflow.
-- Optionally, **Microsoft PowerPoint on Windows** for the bundled rendering and edit-probe script. Creating the PPTX does not require Office. Other platforms can use an available PPTX renderer.
+- **Windows, macOS and Linux** use the same export/audit command. Creating the PPTX does not require Office or PowerShell.
+- For previews, use **LibreOffice + Poppler on any platform**, or desktop **Microsoft PowerPoint on Windows**. The renderer is selected automatically. See [platform setup](references/rendering.md).
 
 The agent client's account requirements and image-processing behavior are separate from the local exporter.
 
@@ -176,15 +177,10 @@ Small labels, occlusion, unusual fonts, and low-resolution inputs require extra 
 From the repository root:
 
 ```bash
-node scripts/export_pptx.mjs --scene examples/diagram.scene.json --output build/figure.pptx
-python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
+python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --output build/figure.pptx
 ```
 
-On Windows with PowerPoint:
-
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
-```
+This single command exports, independently audits, and renders with an installed backend. It skips crop preparation when unnecessary and reuses a matching verified preview for unchanged PPTX bytes. `--renderer none` runs export/audit only. Font changes require `--force-render`; missing renderers are reported explicitly. Visual review remains required.
 
 See the [usage guide](docs/USAGE.md) for crop preparation, updating, rendering, and troubleshooting, or the [scene schema](references/scene-schema.md) for fields and supported objects.
 

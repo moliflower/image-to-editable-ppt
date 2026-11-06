@@ -108,9 +108,9 @@
 | 支持图片输入与 Skill 的智能体 | 查看原图、识别布局、构建场景 | 图片重建需要 |
 | Node.js 18+ | 生成原生 PPTX | 必需 |
 | Python 3.10+ 与 Pillow | 处理图片裁片，独立检查 PPTX | 完整工作流需要 |
-| Microsoft PowerPoint（Windows） | 使用附带脚本渲染、验证编辑操作 | 可选；生成 PPTX 不需要 Office |
+| LibreOffice + Poppler（所有平台）或 Microsoft PowerPoint（Windows） | 生成实际 PPTX 预览 | 可选；生成与审计 PPTX 不需要 Office / PowerShell |
 
-其他系统可使用可用的 PPTX 渲染器检查视觉效果。智能体自身的运行、账户与图片处理方式由所用客户端决定。
+Windows、macOS 和 Linux 使用同一个构建命令；预览后端会自动选择。跨平台安装说明见[渲染与平台支持](references/rendering.md)。智能体自身的运行、账户与图片处理方式由所用客户端决定。
 
 ### 2. 安装完整技能目录
 
@@ -212,15 +212,10 @@ python -m pip install -r requirements.txt
 以下命令在**仓库根目录**执行，使用已提供的场景 JSON 验证本地工具链：
 
 ```bash
-node scripts/export_pptx.mjs --scene examples/diagram.scene.json --output build/figure.pptx
-python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
+python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --output build/figure.pptx
 ```
 
-Windows 安装了 PowerPoint 时，生成实际预览：
-
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
-```
+同一个命令负责导出、独立审计和实际渲染；没有裁片时跳过准备步骤，文件未变化时复用经过摘要核对的预览。`--renderer none` 仅导出和审计；字体变化后用 `--force-render`。缺少渲染器会明确报告，视觉核对仍需完成。
 
 图片裁片准备、场景字段、后台渲染、编辑验证及故障排查，见[完整使用指南](docs/USAGE.zh-CN.md)和[场景格式](references/scene-schema.md)。
 

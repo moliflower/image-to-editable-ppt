@@ -24,14 +24,13 @@ node --test tests/test_export.mjs
 python -X utf8 -m unittest discover -s tests -p "test_*.py"
 ```
 
-GitHub Actions runs structural and script tests with Node.js 22 and Python 3.12. It does not run Microsoft PowerPoint. Changes affecting appearance also need an actual PPTX export and visual review.
+GitHub Actions runs structural and script tests with Node.js 22 and Python 3.12 on Windows, macOS and Linux, plus a Linux LibreOffice/Poppler rendering job. It does not run Microsoft PowerPoint. Changes affecting appearance also need visual review; backend changes should be tested with the relevant installed renderer.
 
 ```bash
-node scripts/export_pptx.mjs --scene examples/diagram.scene.json --output build/figure.pptx
-python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figure.exported.scene.json --report build/audit.json
+python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --output build/figure.pptx
 ```
 
-See the [usage guide](docs/USAGE.md) for rendering and edit-probe commands. Documentation-only changes need working relative links, images, anchors, and accurate command examples.
+See [platform rendering](references/rendering.md) for backend setup and optional edit probes. Tests and edit probes are maintenance checks, not steps to repeat on every user's reconstructed image. Documentation-only changes need working relative links, images, anchors, and accurate command examples.
 
 ## Submit a change
 

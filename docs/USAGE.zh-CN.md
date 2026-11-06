@@ -4,6 +4,18 @@
 
 本指南介绍本地工具链的使用方式。图片理解和逐元素重建由智能体完成；下面的命令用来准备图片裁片、导出场景、检查文件及渲染结果。
 
+## Windows、macOS、Linux 通用入口
+
+```text
+python -X utf8 scripts/build_figure.py --scene build/scene.json --source reference.png --output build/figure.pptx
+```
+
+没有原图裁片时可省略 `--source`。命令按需准备裁片，然后导出一次、独立审计一次，并选择可用的渲染器。Windows 可以使用 PowerPoint；三个平台都可使用 LibreOffice 与 Poppler。安装和后端选择见[平台渲染说明](../references/rendering.md)。核心导出与审计，以及 LibreOffice 渲染均不需要 PowerShell。
+
+查看 `render.status`：`rendered` 表示已从实际 PPTX 生成预览，`unavailable` 表示缺少渲染器，视觉检查仍未完成。`.build.json` 记录每阶段耗时。文件、尺寸、后端和预览摘要一致时复用预览；改动字体后使用 `--force-render`。缓存命中也不代表已经人工看过图片。
+
+普通图片重建无需重复运行编辑探针、整个仓库测试或其他示例回归。这些检查用于维护导出器或调查具体故障。以下单独命令供排查和高级使用。
+
 ## 安装与目录
 
 首次安装见[快速开始](../README.md#quick-start)。完整目录应包含：
@@ -16,7 +28,9 @@ image-to-editable-ppt/
 │   ├── export_pptx.mjs          # 本地原生 PPTX 导出器
 │   ├── image_assets.py         # 图片检查、裁片与嵌入
 │   ├── audit_pptx.py           # 独立 OOXML 审计
-│   └── render_powerpoint.ps1   # Windows PowerPoint 渲染与编辑验证
+│   ├── build_figure.py         # 跨平台统一构建入口
+│   ├── render_pptx.py          # 自动选择渲染器并缓存预览
+│   └── render_powerpoint.ps1   # 可选的 Windows 后端与编辑探针
 ├── references/                 # 场景格式与上游来源
 ├── vendor/figureforge/          # 固定版本的上游导出器与模板
 ├── examples/                   # 基础示例与复杂重建案例
@@ -146,7 +160,7 @@ python -X utf8 scripts/audit_pptx.py --pptx build/figure.pptx --scene build/figu
 
 原生线条支持 `arrowStart: true` 与 `arrow: true` 组成双端箭头，`dash: [12, 6]` 指定像素单位的虚线/间隔长度，所有对象支持 `rotation` 顺时针角度。显式字体、字号与换行保持不变，不使用浏览器 Canvas。示例见 [native-capabilities.scene.json](../examples/native-capabilities.scene.json)。
 
-## PowerPoint 实际渲染
+## 科研文字
 
 科研标签可通过同一文本节点的 `runs` 混排样式，所有片段拼接后必须与 `text` 完全一致。片段继承文本框的字体、颜色和粗斜体；`baselineShift` 的 `super` / `sub` 设置上下标，不会自动缩小字号。`lineSpacing` 使用原图像素，渐变色标的 `opacity` 范围为 0–1。
 
@@ -157,23 +171,13 @@ python -X utf8 scripts/audit_pptx.py --pptx build/scientific-text.pptx --scene b
 
 审计核验文件内实际保存的文字样式与渐变参数，测试还会故意篡改文件来检查能否发现错误。字段见[场景格式](../references/scene-schema.md#scientific-text-within-one-editable-box)，效果见[渲染示例](../examples/scientific-text/README.md)。字体是否安装、文字是否溢出仍须以实际渲染检查。
 
-Windows 安装了桌面版 PowerPoint 时：
+## 渲染已有 PPTX
 
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
+```text
+python -X utf8 scripts/render_pptx.py --pptx build/figure.pptx --output build/figure.png --renderer auto --width 1600
 ```
 
-脚本不显示演示文稿窗口，只打开目标文件进行导出，然后关闭该文件。如果 PowerPoint 中仍有其他演示文稿打开，它不会主动退出应用。输出包括 PNG 与记录对象信息的 `.office.json`。
-
-同时验证文字修改、形状移动和箭头改色：
-
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/probe.png -EditProbePath build/edited-probe.pptx
-```
-
-验证操作另存为副本，不覆盖输入文件。预览 PNG 在验证修改之前导出，因此展示的是原始生成结果；`edited-probe.pptx` 用于检查修改后的副本。
-
-其他平台可以使用可用的 PPTX 渲染器。不同渲染器和缺失字体可能改变字距与换行，应以最终使用的软件核对。没有可用渲染器时，明确标注“视觉检查未完成”。
+使用与构建命令相同的后端选择和缓存规则，渲染实际 PPTX 文件。不同字体和渲染器可能影响字距，应在最终使用的软件中核对关键排版。Windows 专用的可选编辑探针、各平台安装方法见[渲染说明](../references/rendering.md)。
 
 ## 故障排查
 

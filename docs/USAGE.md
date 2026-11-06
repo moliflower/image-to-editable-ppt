@@ -4,6 +4,18 @@
 
 The agent interprets the reference image and reconstructs its elements. The local tools prepare image crops, export a scene, audit the package, and render the actual PPTX.
 
+## Recommended command on Windows, macOS and Linux
+
+```text
+python -X utf8 scripts/build_figure.py --scene build/scene.json --source reference.png --output build/figure.pptx
+```
+
+Omit `--source` for scenes without source crops. This command prepares crops only if declared, exports once, audits once, and selects a renderer. Windows can use PowerPoint; all platforms can use LibreOffice plus Poppler. See [rendering setup and backend selection](../references/rendering.md). No PowerShell is needed for core export/audit or for LibreOffice rendering.
+
+Inspect `render.status`: `rendered` means the actual PPTX produced a preview; `unavailable` means visual verification still needs a renderer. The `.build.json` report includes stage timings. Matching previews are cached using document/output hashes and renderer identity. Use `--force-render` after changing fonts. A cached image still needs visual review.
+
+Ordinary figures do not need an edit probe, the repository test suite or another example regression. Perform those when maintaining the exporter or diagnosing a specific problem. The sections below expose the individual tools for troubleshooting and advanced use.
+
 ## Installation and directory layout
 
 Start with the [quick start](../README.md#quick-start). Install the complete repository:
@@ -16,7 +28,9 @@ image-to-editable-ppt/
 │   ├── export_pptx.mjs          # Native PPTX exporter
 │   ├── image_assets.py         # Image inspection, crops, and embedding
 │   ├── audit_pptx.py           # Independent OOXML audit
-│   └── render_powerpoint.ps1   # PowerPoint rendering and edit probe
+│   ├── build_figure.py         # Unified cross-platform build
+│   ├── render_pptx.py          # Renderer selection and preview cache
+│   └── render_powerpoint.ps1   # Optional Windows backend and edit probe
 ├── references/                 # Scene format and upstream provenance
 ├── vendor/figureforge/          # Pinned exporter and template
 ├── examples/                   # Minimal scene and public SAM 2 example
@@ -145,7 +159,7 @@ python -X utf8 scripts/audit_pptx.py --pptx build/native-capabilities.pptx --sce
 
 See the [scene schema](../references/scene-schema.md) for normalized dash inputs and source manifests.
 
-## Render with Microsoft PowerPoint
+## Scientific text
 
 For mixed-format scientific labels, use `runs` within one text node. Run text must concatenate exactly to the node's `text`; font/color/emphasis inherit from the node, and `baselineShift` selects `super`/`sub` without shrinking the declared size. Optional `lineSpacing` uses source pixels. Gradient stops can include `opacity` from 0 to 1.
 
@@ -156,21 +170,13 @@ python -X utf8 scripts/audit_pptx.py --pptx build/scientific-text.pptx --scene b
 
 The audit checks native run styles and gradient values, including intentional package-corruption cases in the test suite. See [schema examples](../references/scene-schema.md#scientific-text-within-one-editable-box) and the [rendered demo](../examples/scientific-text/README.md). Actual rendering is still needed to verify font availability and visual fit.
 
-On Windows with desktop PowerPoint installed:
+## Render an existing PPTX
 
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/figure.png -Width 1600
+```text
+python -X utf8 scripts/render_pptx.py --pptx build/figure.pptx --output build/figure.png --renderer auto --width 1600
 ```
 
-The script opens the target file without a presentation window, exports a PNG and an `.office.json` object record, then closes that file. It does not quit PowerPoint while other presentations remain open.
-
-To verify text editing, shape movement, and arrow recoloring in a separate copy:
-
-```powershell
-powershell -NoProfile -File scripts/render_powerpoint.ps1 -InputPptx build/figure.pptx -OutputPng build/probe.png -EditProbePath build/edited-probe.pptx
-```
-
-The preview is exported before probe edits; the modified document is saved separately. Other platforms may use an available PPTX renderer. Check the file in the intended presentation software when fonts or rendering differ.
+This uses the same backend selection and cache as the build command. It renders the actual PPTX, not the scene JSON. Fonts and renderers can differ, so check the result in the intended application when exact typography matters. Windows maintenance-only edit probes and installation instructions are in [rendering.md](../references/rendering.md).
 
 ## Troubleshooting
 

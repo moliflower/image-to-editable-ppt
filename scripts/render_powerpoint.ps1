@@ -2,7 +2,8 @@ param(
   [Parameter(Mandatory=$true)][string]$InputPptx,
   [Parameter(Mandatory=$true)][string]$OutputPng,
   [int]$Width=1600,
-  [string]$EditProbePath
+  [string]$EditProbePath,
+  [switch]$SummaryOnly
 )
 $ErrorActionPreference = 'Stop'
 $sourcePath = (Resolve-Path -LiteralPath $InputPptx).Path
@@ -18,7 +19,7 @@ try {
   $renderHeight = [int][Math]::Round($Width * $presentation.PageSetup.SlideHeight / $presentation.PageSetup.SlideWidth)
   $slide.Export($targetPath, 'PNG', $Width, $renderHeight)
   $objects = @()
-  for ($i = 1; $i -le $slide.Shapes.Count; $i++) {
+  for ($i = 1; !$SummaryOnly -and $i -le $slide.Shapes.Count; $i++) {
     $shape = $slide.Shapes.Item($i)
     $label = ''
     if ($shape.HasTextFrame -and $shape.TextFrame.HasText) { $label = $shape.TextFrame.TextRange.Text }
@@ -52,9 +53,9 @@ try {
     $presentation.SaveCopyAs($probe, 24)
   }
   if (!(Test-Path -LiteralPath $targetPath)) { throw 'PowerPoint did not produce the PNG' }
-  $report = [PSCustomObject]@{Renderer='Microsoft PowerPoint'; ObjectCount=$objects.Count; Objects=$objects}
+  $report = [PSCustomObject]@{Renderer='Microsoft PowerPoint'; ObjectCount=$slide.Shapes.Count; Objects=$objects}
   $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath ([IO.Path]::ChangeExtension($targetPath, '.office.json')) -Encoding UTF8
-  Write-Output "PowerPoint rendered $($objects.Count) independent objects to $targetPath"
+  Write-Output "PowerPoint rendered $($slide.Shapes.Count) independent objects to $targetPath"
   [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($slide)
 } finally {
   if ($presentation) {
