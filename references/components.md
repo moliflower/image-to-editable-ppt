@@ -41,13 +41,6 @@ Run the normal `build_figure.py` command on the saved scene. Geometry/style fiel
 
 Helper defaults are not a design template. Supply measured source sizes/colors; use ordinary nodes when a composite does not fit. Do not change a source diagram to fit the library. Formula components are native text, not Office equations. Generated chart geometry does not recover its original numerical data.
 
-The [component gallery](../examples/components_demo.py) exercises these helpers:
-
-```text
-python examples/components_demo.py build/components.scene.json
-python -X utf8 scripts/build_figure.py --scene build/components.scene.json --output build/components.pptx
-```
-
 ## Whole-task timing
 
 For a measured trial, start **before source selection/download or image inspection**, after any unrelated tool development:

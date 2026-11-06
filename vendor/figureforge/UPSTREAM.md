@@ -18,7 +18,7 @@ The wrapper replaces browser fetch for the static template with a local-file rea
 
 Export reports keep both `upstreamRevision` and `geometryBackportRevision`. A backport reference does not claim that the entire upstream release has been adopted. All vendored copyright/license notices remain intact.
 
-Further original local extensions add rich text runs, explicit scientific baseline shifts, gradient-stop alpha, and independent text/gradient audits. The helper `editable-rich-text.mjs` is local code, not part of the pinned FigureForge source. See the [related-project implementation review](related-projects.md) for inspected sources, reuse boundaries, and design decisions.
+Further original local extensions add rich text runs, explicit scientific baseline shifts, gradient-stop alpha, and independent text/gradient audits. The helper `editable-rich-text.mjs` is local code, not part of the pinned FigureForge source. See the [archived implementation review](https://github.com/moliflower/image-to-editable-ppt/blob/8230cbdffb3158fa165c0fe07a8962faeb071e3d/references/related-projects.md) for inspected sources, reuse boundaries, and design decisions.
 
 The current assistant reconstructs the user image into a pixel-coordinate scene. The website's vision-provider requests, retrieval gallery, UI, and API refinement pipeline are not bundled. This is an assistant-operated skill, not a standalone automatic OCR executable. These scripts send no user images to an additional vision service.
 

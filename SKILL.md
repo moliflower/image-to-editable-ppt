@@ -41,4 +41,4 @@ Reconstruct the supplied figure as one editable PPTX slide in its original aspec
 - Paths are native editable geometry but are not automatically attached to modules. Preserve arrow direction and topology. Geometry, rich text, gradients, dashes, rotation and image provenance are specified in the [schema](references/scene-schema.md); the audit checks their supported OOXML declarations.
 - A complete photo inventory and correct layering remain the assistant's responsibility. Source-pixel checks cannot prove that an undeclared photo was recognized or that another object does not cover it.
 
-The bundled exporter and adaptation provenance are documented in [UPSTREAM.md](references/UPSTREAM.md).
+The bundled exporter and adaptation provenance are documented in [UPSTREAM.md](vendor/figureforge/UPSTREAM.md).

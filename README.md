@@ -12,7 +12,7 @@ Visual understanding by your agent. Native PPTX export with a local FigureForge 
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Showcase](#showcase) · [Quick start](#quick-start) · [How it works](#how-it-works) · [FAQ](#faq) · [Contributing](CONTRIBUTING.md)
+[Showcase](#showcase) · [Quick start](#quick-start) · [How it works](#how-it-works) · [FAQ](#faq) · [Contributing](https://github.com/moliflower/image-to-editable-ppt/blob/main/.github/CONTRIBUTING.md)
 
 </div>
 
@@ -28,11 +28,11 @@ Feature tensors, similarity matrices and attention paths, reconstructed from [Po
 
 **Reconstructed figure**
 
-![PosDiffNet architecture rendered from the editable PowerPoint file](examples/posdiffnet/preview.png)
+![PosDiffNet architecture rendered from the editable PowerPoint file](https://raw.githubusercontent.com/moliflower/image-to-editable-ppt/8230cbdffb3158fa165c0fe07a8962faeb071e3d/examples/posdiffnet/preview.png)
 
 **All objects selected in PowerPoint**
 
-![Actual PowerPoint screenshot with all 478 PosDiffNet objects selected](docs/assets/posdiffnet-all-selected.png)
+![Actual PowerPoint screenshot with all 478 PosDiffNet objects selected](https://raw.githubusercontent.com/moliflower/image-to-editable-ppt/8230cbdffb3158fa165c0fe07a8962faeb071e3d/docs/assets/posdiffnet-all-selected.png)
 
 478 independent objects, including editable labels, matrix cells, feature faces and paths. Only the three point-cloud views remain images.
 
@@ -42,11 +42,11 @@ Repository trees, dependency graphs and a circular workflow, reconstructed from 
 
 **Reconstructed figure**
 
-![RepoMaster overview rendered from the editable PowerPoint file](examples/repomaster/preview.png)
+![RepoMaster overview rendered from the editable PowerPoint file](https://raw.githubusercontent.com/moliflower/image-to-editable-ppt/8230cbdffb3158fa165c0fe07a8962faeb071e3d/examples/repomaster/preview.png)
 
 **All objects selected in PowerPoint**
 
-![Actual PowerPoint screenshot with all 353 RepoMaster objects selected](docs/assets/repomaster-all-selected.png)
+![Actual PowerPoint screenshot with all 353 RepoMaster objects selected](https://raw.githubusercontent.com/moliflower/image-to-editable-ppt/8230cbdffb3158fa165c0fe07a8962faeb071e3d/docs/assets/repomaster-all-selected.png)
 
 353 independent objects. Text, graph nodes, modules and routes remain editable; 16 complex logos and illustrations stay as separate images.
 
@@ -54,144 +54,124 @@ Repository trees, dependency graphs and a circular workflow, reconstructed from 
 
 Select a label, change its text, move a module and select an arrow in desktop PowerPoint.
 
-![Actual PowerPoint recording: selecting text, editing a label, moving a module and selecting an arrow in the SAM 2 example](docs/assets/powerpoint-editing.gif)
+![Actual PowerPoint recording: selecting text, editing a label, moving a module and selecting an arrow in the SAM 2 example](https://raw.githubusercontent.com/moliflower/image-to-editable-ppt/8230cbdffb3158fa165c0fe07a8962faeb071e3d/docs/assets/powerpoint-editing.gif)
 
-The selection screenshots and animation show real PowerPoint UI. Example files, source attribution and reconstruction notes are retained in the [example directories](examples/).
+The selection screenshots and animation show real PowerPoint UI. Showcase media is hosted separately from the installed skill.
 
-## Features and use cases
+## What the skill does
 
-When all you have is a screenshot, a paper figure, or an old architecture image, a small change can mean redrawing the whole figure. This skill reconstructs the reference layout as independently selectable text boxes, shapes, and arrows.
+- Reconstructs labels, modules, matrices and arrows as independent PowerPoint objects.
+- Preserves reference wording, aspect ratio and connection topology where the source permits.
+- Supports mixed text styles, superscripts/subscripts, gradients, custom dashes and rotated geometry.
+- Retains photos and complex artwork as separate crops, with source-pixel checks.
+- Exports locally, audits the PPTX and renders it with an available Office backend.
 
-| Capability | Result |
-| --- | --- |
-| Element-by-element reconstruction | Labels, containers, network blocks, and arrows become separate objects |
-| Reference-based layout | Source aspect ratio, wording, spatial arrangement, and connection topology are preserved where reconstruction permits |
-| Native PowerPoint output | DrawingML text, shapes, and paths that can be edited directly |
-| Mixed visual content | Photographs, heatmaps, and complex textures remain separate image objects |
-| Export verification | Independent package audit followed by actual PPTX rendering and visual review |
-| Local exporter | No npm dependencies, network calls, or additional vision API key for export |
-
-The local exporter supports **bidirectional arrows, custom dash spacing, and rotation of shapes, paths, and images**. New photo crops retain source coordinates and pixel digests; the audit can verify them against the original image. Explicit fonts and sizes remain under your control, with no browser Canvas dependency. See the [native capability example](examples/native-capabilities.scene.json) and [scene schema](references/scene-schema.md).
-
-Mixed fonts, colors, emphasis and **superscripts/subscripts can stay in one editable text box**. Native gradients retain transparent color stops. Compact [scientific-text fixtures](examples/scientific-text/README.md) and the [17-object smoke-test scene](examples/diagram.scene.json) remain available for toolchain development.
-
-Designed for scientific method figures, model architectures, flowcharts, and diagrams built from text and geometric elements. The agent interprets the image and authors a scene JSON. The CLI exports that scene; it is not a standalone image-to-OCR command.
+Image interpretation is performed by your vision-capable agent. The bundled exporter needs no extra vision API key, GPU, npm packages or browser Canvas.
 
 <a id="quick-start"></a>
 
 ## Quick start
 
+### Install the skill
+
+**[Download the skill ZIP](https://github.com/moliflower/image-to-editable-ppt/archive/refs/heads/main.zip)** and extract it as `image-to-editable-ppt/` in your agent's skills directory. The ZIP includes the runtime, its instructions and licenses. It excludes tests, CI configuration and demonstration files.
+
+For a Git installation, run this from your agent's skills directory:
+
+```text
+git clone --depth 1 --single-branch --branch main https://github.com/moliflower/image-to-editable-ppt.git image-to-editable-ppt
+python -m pip install -r image-to-editable-ppt/requirements.txt
+```
+
+For a ZIP installation, run the same `pip install` command from the parent folder. For Codex, the usual skills directory is `~/.codex/skills`, or `<CODEX_HOME>/skills` when configured. Avoid an extra `image-to-editable-ppt-main/` nesting level.
+
+The shallow Git command avoids downloading historical showcase assets. Git checkouts also contain small maintenance tests; these are excluded from the install ZIP.
+
 ### Requirements
 
-- A vision-capable agent with skill support for image interpretation.
-- **Node.js 18+** for PPTX export.
-- **Python 3.10+ and Pillow** for image crops and the independent audit workflow.
-- **Windows, macOS and Linux** use the same export/audit command. Creating the PPTX does not require Office or PowerShell.
-- For previews, use **LibreOffice + Poppler on any platform**, or desktop **Microsoft PowerPoint on Windows**. The renderer is selected automatically. See [platform setup](references/rendering.md).
+| Dependency | Purpose |
+| --- | --- |
+| Vision-capable agent with skill support | Interpret the image and author the reconstruction |
+| Node.js 18+ | Export native PPTX |
+| Python 3.10+ and Pillow | Prepare crops and audit the exported file |
+| LibreOffice + Poppler, or Microsoft PowerPoint on Windows | Optional actual-PPTX previews |
 
-The agent client's account requirements and image-processing behavior are separate from the local exporter.
-
-### Install the complete repository
-
-**macOS / Linux**
-
-```bash
-git clone https://github.com/moliflower/image-to-editable-ppt.git "${CODEX_HOME:-$HOME/.codex}/skills/image-to-editable-ppt"
-cd "${CODEX_HOME:-$HOME/.codex}/skills/image-to-editable-ppt"
-python -m pip install -r requirements.txt
-```
-
-**Windows PowerShell**
-
-```powershell
-$skillRoot = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
-$skillPath = Join-Path $skillRoot 'skills/image-to-editable-ppt'
-git clone https://github.com/moliflower/image-to-editable-ppt.git $skillPath
-Set-Location $skillPath
-python -m pip install -r requirements.txt
-```
-
-You can also [download the ZIP](https://github.com/moliflower/image-to-editable-ppt/archive/refs/heads/main.zip) and extract it into the skill directory. Keep `scripts/`, `references/`, and `vendor/` together with `SKILL.md`. If the destination already exists, see the [update instructions](docs/USAGE.md#update).
+Export and audit work on **Windows, macOS and Linux** without Office or PowerShell. LibreOffice rendering works on all three platforms. [Renderer setup](references/rendering.md).
 
 ### Attach an image and ask
 
 ```text
 Use $image-to-editable-ppt to reconstruct this image as an editable PPTX.
-Preserve its wording, aspect ratio, and layout. Make text, modules, and arrows
+Preserve its wording, aspect ratio and layout. Make text, modules and arrows
 independently editable. Return the PPTX and a preview rendered from that file.
 ```
 
-Automatic skill discovery depends on your agent client. You can request a PNG-only reconstruction that does not inspect neighboring source files, or ask to preserve the source typography.
+The result is a single-slide PPTX plus an actual rendered preview when a renderer is installed. The scene JSON is retained for revisions. Raster regions, uncertain labels and incomplete visual verification are disclosed.
 
-The skill produces a single-slide PPTX, a rendered preview when a renderer is available, and a retained scene JSON for revisions. Recognition uncertainties, raster regions, and incomplete visual checks are disclosed.
+<a id="update"></a>
 
-English scientific labels, numbers, and mathematical text default to Times New Roman. Explicit typography, template, or source-font preservation instructions override this default. Chinese and unsupported glyphs use an installed fallback.
+### Update
+
+For an existing Git install, run `git pull --ff-only` from the skill folder, then `python -m pip install -r requirements.txt`. For a ZIP install, replace the installed skill with the current ZIP, preserving any changes you made yourself. Keep task outputs outside the installed skill folder.
 
 <a id="how-it-works"></a>
 
 ## How it works
 
-1. **Inspect** the image, zoom into dense regions, and identify text, geometry, layering, and arrow endpoints.
-2. **Reconstruct** a pixel-coordinate scene with stable IDs for separate objects.
-3. **Export** native DrawingML with the bundled, pinned FigureForge exporter.
-4. **Audit** text, object counts, arrowheads, aspect ratio, and OOXML package integrity.
-5. **Render and refine** the actual PPTX to check spacing, fonts, clipping, and directions.
+1. Inspect the reference and resolve dense or ambiguous details.
+2. Author a pixel-coordinate scene with separate objects and reusable scientific components.
+3. Export once, independently audit once, and render the actual PPTX.
+4. Review the rendered PNG, correct material defects, and deliver the file.
 
-Structural validation does not establish visual fidelity. Image understanding is performed by the current agent; the local scripts do not send an image to another vision service.
+Routine verification does not require Computer Use, desktop clicking or a recording. The visible UI examples above are demonstrations. Source fonts and explicit user typography take priority; otherwise scientific English and mathematics default to Times New Roman.
 
 ## Editability and limits
 
-| Source content | PowerPoint output | What remains limited |
-| --- | --- | --- |
-| Titles and labels | Native text boxes | Font substitution can change spacing |
-| Geometric shapes and modules | Independent native shapes | Complex modules may consist of several shapes |
-| Lines and arrows | Native line/path objects | Not automatically attached to adjacent modules |
-| Photos, heatmaps, complex artwork | Separate image objects | Internal content remains raster pixels |
-| Equations | Editable text and positioned scripts | Not recovered as native Office equations |
-| Charts in a bitmap | Reconstructed shapes and labels | Original data is not recovered |
+| Source content | Output and limits |
+| --- | --- |
+| Text, geometric modules, matrices | Native text and shapes; font substitution can affect spacing |
+| Lines, arrows and curves | Native paths; they do not automatically reattach when a module moves |
+| Photos, heatmaps and detailed artwork | Separate images; internal pixels remain raster |
+| Equations and bitmap charts | Editable text/geometry; original equation structures and numerical data are not recovered |
 
-Small labels, occlusion, unusual fonts, and low-resolution inputs require extra review. Subtle textures, shadows, and typography may differ. The skill currently reconstructs one image per slide; it does not include an unattended batch-recognition service.
+Low resolution, occlusion and unusual glyphs need extra review. A successful example is not a guarantee of pixel-perfect reconstruction for every input. This skill reconstructs one image per slide; it does not bundle unattended batch recognition.
 
-## Verify the local toolchain
+## What is installed
 
-Repeated scientific structures can be authored with the [component helpers](references/components.md): module chains, feature maps, matrices, chart primitives, cycles, fractions and summations expand to native editable objects. Measured trials record whole-task wall time separately from export/render time. The normal delivery remains one PPTX and one preview.
-
-From the repository root:
-
-```bash
-python -X utf8 scripts/build_figure.py --scene examples/diagram.scene.json --output build/figure.pptx
+```text
+image-to-editable-ppt/
+├── SKILL.md                 Agent workflow
+├── agents/                  Skill discovery metadata
+├── scripts/                 Export, audit, rendering and scientific components
+├── references/              Scene schema, components and renderer instructions
+├── vendor/figureforge/      Bundled exporter, template and upstream notices
+└── requirements.txt         Python dependency
 ```
 
-This single command exports, independently audits, and renders with an installed backend. It skips crop preparation when unnecessary and reuses a matching verified preview for unchanged PPTX bytes. `--renderer none` runs export/audit only. Font changes require `--force-render`; missing renderers are reported explicitly. Visual review remains required.
+The package also includes the README files and licenses. The three `references/` files are operational instructions for the agent, not paper reference images. They are read when needed. Showcase images, example PPTX files, reconstruction scenes, benchmark reports and research notes are not installed.
 
-See the [usage guide](docs/USAGE.md) for crop preparation, updating, rendering, and troubleshooting, or the [scene schema](references/scene-schema.md) for fields and supported objects.
+For manual debugging of an already-authored scene, run from the skill directory:
+
+```text
+python -X utf8 scripts/build_figure.py --scene /path/to/scene.json --source /path/to/reference.png --output /path/to/figure.pptx
+```
+
+Omit `--source` when the scene has no source crops. See the [scene schema](references/scene-schema.md), [component API](references/components.md) and [rendering options](references/rendering.md).
 
 <a id="faq"></a>
 
 ## FAQ
 
-**Is the slide just a flattened image?** Text, diagram modules, and arrows are native objects. Declared photo/artwork regions may remain images. The workflow prohibits using a full-slide bitmap with invisible text as a substitute for reconstruction.
+**Can I share only `SKILL.md`?** Share the install ZIP. The instructions use the bundled scripts, reference guides and exporter.
 
-**Do I need another API key or a GPU?** The exporter needs neither. Your existing agent handles visual understanding, so it must support images and skill execution.
+**Why is the skill not detected?** Check that `image-to-editable-ppt/SKILL.md` is directly under your client's skills folder. Reload skills using your client's supported mechanism, or start a new session and invoke the skill explicitly.
 
-**Can I share only `SKILL.md`?** Share the whole repository or ZIP. The instructions depend on the bundled scripts, references, and exporter.
+**Does local export mean the image never leaves my computer?** The bundled scripts make no network requests. Image handling by the agent client follows that client's behavior. README showcase media is loaded by the page viewer, separately from the exporter.
 
-**Why is the skill not showing up?** Check that the path ends in `skills/image-to-editable-ppt/SKILL.md`, with no extra ZIP nesting, and check any custom `CODEX_HOME`. Reload skills using your client's supported mechanism, or start a new session and invoke `$image-to-editable-ppt` explicitly.
+## Contributing and attribution
 
-**Does local export mean my image never leaves my computer?** The repository scripts make no network requests. Image handling by the agent client depends on that client.
+Maintainer tests and CI remain in the Git repository; the install ZIP excludes them. [Contributing guide](https://github.com/moliflower/image-to-editable-ppt/blob/main/.github/CONTRIBUTING.md) · [Issues](https://github.com/moliflower/image-to-editable-ppt/issues).
 
-## Documentation and contributions
+Native export builds on [FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery). Its [license](vendor/figureforge/LICENSE) and [pinned-source/adaptation notes](vendor/figureforge/UPSTREAM.md) are retained. Skill instructions and wrapper code use the [MIT License](LICENSE).
 
-- [Usage guide](docs/USAGE.md): installation, export, crop preparation, rendering, troubleshooting.
-- [Skill instructions](SKILL.md): the agent's full reconstruction workflow.
-- [Scene schema](references/scene-schema.md): coordinates, text, paths, gradients, and images.
-- [Contributing](CONTRIBUTING.md): reporting problems, sharing examples, and validating changes.
-- [Upstream provenance](references/UPSTREAM.md): pinned FigureForge version and adaptation details.
-
-Report problems through [Issues](https://github.com/moliflower/image-to-editable-ppt/issues). A reference image, expected result, and environment details help reproduce a problem.
-
-## Acknowledgments and license
-
-Native PPTX export is based on [Top-Conf Figure Gallery / FigureForge](https://github.com/qwdwqfwq/topconf-paper-figure-gallery). Its original copyright and MIT license are retained in [vendor/figureforge/LICENSE](vendor/figureforge/LICENSE).
-
-Skill instructions and wrapper code use the [MIT License](LICENSE). The public SAM 2 reference and its adapted example retain [Apache-2.0 source attribution and licensing](examples/sam2/README.md#source). PosDiffNet and RepoMaster artwork retain their original rights and are excluded from the code license; see their [PosDiffNet](examples/posdiffnet/SOURCE.md) and [RepoMaster](examples/repomaster/SOURCE.md) source notices.
+Showcase artwork retains its original rights: [PosDiffNet](https://github.com/moliflower/image-to-editable-ppt/blob/8230cbdffb3158fa165c0fe07a8962faeb071e3d/examples/posdiffnet/SOURCE.md), [RepoMaster](https://github.com/moliflower/image-to-editable-ppt/blob/8230cbdffb3158fa165c0fe07a8962faeb071e3d/examples/repomaster/SOURCE.md), and [SAM 2](https://github.com/moliflower/image-to-editable-ppt/blob/8230cbdffb3158fa165c0fe07a8962faeb071e3d/examples/sam2/NOTICE.md). These fixed-version media and notices are hosted separately and are not part of the install package.

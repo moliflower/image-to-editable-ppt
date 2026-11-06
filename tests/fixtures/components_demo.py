@@ -1,7 +1,7 @@
 """Runnable component gallery; all plotted positions are illustrative pixel geometry."""
 from pathlib import Path
 import sys
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'))
 from scientific_components import Figure
 
 

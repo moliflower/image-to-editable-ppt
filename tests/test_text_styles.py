@@ -19,7 +19,7 @@ class TextStyleTests(unittest.TestCase):
             tmp = Path(tmp)
             out = tmp / "figure.pptx"
             subprocess.run(["node", str(ROOT / "scripts/export_pptx.mjs"), "--scene",
-                            str(ROOT / "examples/scientific-text.scene.json"), "--output", str(out)],
+                            str(ROOT / "tests/fixtures/scientific-text.scene.json"), "--output", str(out)],
                            check=True, capture_output=True)
             scene = tmp / "figure.exported.scene.json"
             report = audit(out, scene)

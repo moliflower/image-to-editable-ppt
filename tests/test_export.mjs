@@ -7,8 +7,8 @@ import { exportScene, validateScene } from '../scripts/export_pptx.mjs';
 import { rotatedBounds } from '../scripts/scene_geometry.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const fixture = JSON.parse(await fs.readFile(path.join(root, 'examples/diagram.scene.json'), 'utf8'));
-const scientific = JSON.parse(await fs.readFile(path.join(root, 'examples/scientific-text.scene.json'), 'utf8'));
+const fixture = JSON.parse(await fs.readFile(path.join(root, 'tests/fixtures/diagram.scene.json'), 'utf8'));
+const scientific = JSON.parse(await fs.readFile(path.join(root, 'tests/fixtures/scientific-text.scene.json'), 'utf8'));
 function member(bytes, wanted) {
   let at = 0;
   while (bytes.readUInt32LE(at) === 0x04034b50) {
@@ -134,12 +134,12 @@ test('native start/end arrows, source-pixel dashes and all primitive rotations s
     {id:'polygon',type:'polyline',points:'300,100 400,100 350,180',closed:true,fill:'#123456',rotation:45},
     {id:'box',type:'rect',x:450,y:100,w:100,h:50,fill:'#345678',rotation:30},
     {id:'oval',type:'ellipse',x:600,y:100,w:100,h:50,fill:'#345678',rotation:-15},
-    {id:'photo',type:'image',x:50,y:300,w:100,h:100,assetPurpose:'photo',file:'sam2/reference.png',rotation:12},
+    {id:'photo',type:'image',x:50,y:300,w:100,h:100,assetPurpose:'photo',file:'pixels.png',rotation:12},
     {id:'label',type:'text',x:300,y:300,w:20,h:50,text:'Explicit font size stays unchanged',fontSize:33,fontFamily:'Times New Roman',rotation:90}
   ]};
   const dir=await fs.mkdtemp(path.join(root,'build','native-caps-'));
   try {
-    const result=await exportScene(scene,path.join(dir,'native.pptx'),path.join(root,'examples'));
+    const result=await exportScene(scene,path.join(dir,'native.pptx'),path.join(root,'tests','fixtures'));
     const xml=member(await fs.readFile(path.join(dir,'native.pptx')),'ppt/slides/slide1.xml');
     for(const angle of [10,-25,45,30,-15,12,90]) assert.ok(xml.includes(`rot="${angle*60000}"`));
     assert.equal(result.arrows,2); assert.equal(result.arrowheads,3);

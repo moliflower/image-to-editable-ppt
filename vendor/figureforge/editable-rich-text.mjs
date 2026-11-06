@@ -1,4 +1,4 @@
-// Original local DrawingML serializer. See references/related-projects.md.
+// Original local DrawingML serializer. See UPSTREAM.md in this directory.
 // Styles remain within one editable text box; font sizes never auto-shrink.
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const rgb = s => { const h = s.replace('#', ''); return (h.length === 3 ? [...h].map(c => c + c).join('') : h).toUpperCase(); };

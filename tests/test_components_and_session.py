@@ -20,7 +20,7 @@ import open_artifact
 
 class ComponentTests(unittest.TestCase):
     def test_gallery_exports_independent_shapes_and_native_math(self):
-        spec=importlib.util.spec_from_file_location('components_demo',ROOT/'examples/components_demo.py')
+        spec=importlib.util.spec_from_file_location('components_demo',ROOT/'tests/fixtures/components_demo.py')
         demo=importlib.util.module_from_spec(spec);spec.loader.exec_module(demo)
         f=demo.example()
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:

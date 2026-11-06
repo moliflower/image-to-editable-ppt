@@ -33,7 +33,7 @@ class ImageAuditTests(unittest.TestCase):
             tmp = Path(tmp)
             source = tmp / "source.png"
             Image.new("RGB", (1200, 650), (20, 120, 190)).save(source)
-            scene = json.loads((ROOT / "examples/diagram.scene.json").read_text(encoding="utf-8"))
+            scene = json.loads((ROOT / "tests/fixtures/diagram.scene.json").read_text(encoding="utf-8"))
             scene["nodes"].append({"id": "sample-photo", "type": "image", "x": 70, "y": 500,
                                    "w": 120, "h": 80, "crop": {"x": 20, "y": 30, "w": 120, "h": 80},
                                    "assetPurpose": "photo", "assetDescription": "Synthetic crop fixture"})
@@ -71,7 +71,7 @@ class ImageAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=BUILD) as tmp:
             tmp=Path(tmp); source=tmp/'source.png'; scene_path=tmp/'scene.json'; prepared=tmp/'prepared.json'
             Image.new('RGB',(1200,650),(10,80,170)).save(source)
-            scene=json.loads((ROOT/'examples/diagram.scene.json').read_text(encoding='utf-8'))
+            scene=json.loads((ROOT/'tests/fixtures/diagram.scene.json').read_text(encoding='utf-8'))
             photo={'id':'photo','type':'image','x':50,'y':500,'w':100,'h':70,'crop':{'x':10,'y':10,'w':100,'h':70},'assetPurpose':'photo'}
             scene['nodes'].append(photo); scene_path.write_text(json.dumps(scene))
             assets.prepare(scene_path,source,prepared)
@@ -93,7 +93,7 @@ class ImageAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=BUILD) as tmp:
             tmp=Path(tmp); source=tmp/'source.png'; original=tmp/'scene.json'; prepared=tmp/'prepared.json'
             Image.new('RGB',(1200,650),(20,120,190)).save(source)
-            scene=json.loads((ROOT/'examples/diagram.scene.json').read_text(encoding='utf-8'))
+            scene=json.loads((ROOT/'tests/fixtures/diagram.scene.json').read_text(encoding='utf-8'))
             scene['nodes'][2]['rotation']=30
             scene['nodes'][5].update(arrowStart=True,dash=[12,6],strokeWidth=2)
             scene['nodes'].append({'id':'photo','type':'image','x':50,'y':500,'w':100,'h':70,'crop':{'x':10,'y':10,'w':100,'h':70},'assetPurpose':'photo','rotation':-12})

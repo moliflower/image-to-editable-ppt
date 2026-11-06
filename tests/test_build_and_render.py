@@ -18,7 +18,7 @@ class BuildAndRenderTests(unittest.TestCase):
     def test_portable_build_with_unicode_paths_and_no_office(self):
         with tempfile.TemporaryDirectory(prefix="ppt test 中文 ", dir=BUILD) as folder:
             out = Path(folder) / "图 figure.pptx"
-            result = build(ROOT / "examples/scientific-text.scene.json", out, renderer="none")
+            result = build(ROOT / "tests/fixtures/scientific-text.scene.json", out, renderer="none")
             self.assertTrue(result["auditPassed"])
             self.assertEqual(result["objectCount"], 18)
             self.assertEqual(result["render"]["status"], "not-rendered")
@@ -33,7 +33,7 @@ class BuildAndRenderTests(unittest.TestCase):
     def test_crops_are_prepared_once_and_source_pixels_verified(self):
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:
             folder = Path(folder)
-            scene = json.loads((ROOT / "examples/diagram.scene.json").read_text(encoding="utf-8"))
+            scene = json.loads((ROOT / "tests/fixtures/diagram.scene.json").read_text(encoding="utf-8"))
             scene["nodes"].append({"id":"crop", "type":"image", "x":800, "y":400, "w":40, "h":30,
                                    "crop":{"x":10,"y":20,"w":40,"h":30}, "assetPurpose":"photo"})
             source = folder / "source.png"
@@ -55,7 +55,7 @@ class BuildAndRenderTests(unittest.TestCase):
     def test_clipping_warnings_survive_the_compact_build_report(self):
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:
             folder = Path(folder)
-            scene = json.loads((ROOT / "examples/diagram.scene.json").read_text(encoding="utf-8"))
+            scene = json.loads((ROOT / "tests/fixtures/diagram.scene.json").read_text(encoding="utf-8"))
             scene["nodes"][0]["x"] = -50
             source = folder / "scene.json"
             source.write_text(json.dumps(scene), encoding="utf-8")
@@ -66,7 +66,7 @@ class BuildAndRenderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:
             folder = Path(folder)
             out = folder / "figure.pptx"
-            build(ROOT / "examples/scientific-text.scene.json", out, renderer="none")
+            build(ROOT / "tests/fixtures/scientific-text.scene.json", out, renderer="none")
             png = folder / "preview.png"
             calls = []
             def fake_command(command, timeout=120):
@@ -105,7 +105,7 @@ class BuildAndRenderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=BUILD) as folder:
             folder = Path(folder)
             out = folder / "figure.pptx"
-            build(ROOT / "examples/diagram.scene.json", out, renderer="none")
+            build(ROOT / "tests/fixtures/diagram.scene.json", out, renderer="none")
             png = folder / "preview.png"
             Image.new("RGB", (100,100), "red").save(png)
             with patch.object(rendering, "available_renderers", return_value={"libreoffice":[sys.executable,sys.executable]}), patch.object(rendering, "run_command", return_value=""):

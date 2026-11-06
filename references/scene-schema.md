@@ -56,7 +56,7 @@ Run `text` values must concatenate exactly to the box's `text`, including spaces
 
 `lineSpacing` optionally sets the baseline-to-baseline distance in source pixels. Without it, multiline text uses 1.14 times the largest font size on each line (at least the box's base size). Empty lines, explicit spaces and Unicode survive export. Wrapping and automatic fitting remain disabled. Review superscript clearance, descenders and mixed font metrics in the real renderer.
 
-The independent audit checks run contents, font names in Latin/East Asian/complex-script slots, sizes, colors, emphasis, baseline offsets, alignment and line spacing. It checks OOXML declarations, not installed-font availability or visual fit. See the [runnable scene](../examples/scientific-text.scene.json) and [PowerPoint-rendered example](../examples/scientific-text/README.md).
+The independent audit checks run contents, font names in Latin/East Asian/complex-script slots, sizes, colors, emphasis, baseline offsets, alignment and line spacing. It checks OOXML declarations, not installed-font availability or visual fit.
 
 ## Native linear gradients
 
@@ -79,7 +79,7 @@ These are native linear shape fills, rotated with the shape. Text/image gradient
 
 `rotation` is a finite clockwise angle in degrees on every supported object type. Coordinates describe the unrotated layout frame. Paths rotate about their exported control-point frame, and clipping warnings account for rotation. For text measured as a narrow vertical OCR box at 90/270 degrees, the existing normalization converts it to a horizontal layout frame; use `rotationBounds: "layout"` when the input already describes that frame.
 
-Explicit font sizes, wording and line breaks remain unchanged. No Canvas text measurement, font fitting, or browser runtime is used. See [the capability scene](../examples/native-capabilities.scene.json) for a runnable example.
+Explicit font sizes, wording and line breaks remain unchanged. No Canvas text measurement, font fitting, or browser runtime is used.
 
 ## Image crops
 
