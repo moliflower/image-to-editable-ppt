@@ -174,6 +174,8 @@ Small labels, occlusion, unusual fonts, and low-resolution inputs require extra 
 
 ## Verify the local toolchain
 
+Repeated scientific structures can be authored with the [component helpers](references/components.md): module chains, feature maps, matrices, chart primitives, cycles, fractions and summations expand to native editable objects. Measured trials record whole-task wall time separately from export/render time. The normal delivery remains one PPTX and one preview.
+
 From the repository root:
 
 ```bash
