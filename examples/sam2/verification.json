@@ -87,7 +87,7 @@
       },
       {
         "state": "08-restored",
-        "caption": "Reference layout restored. Download the editable PPTX below.",
+        "caption": "Reference layout restored. Text, shapes and arrows remain editable.",
         "durationMs": 1400
       }
     ]

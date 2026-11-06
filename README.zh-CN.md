@@ -20,61 +20,43 @@
 
 <a id="showcase"></a>
 
-## 把论文架构图重建为可编辑 PowerPoint
+## 从图片到可编辑 PowerPoint
 
-**PosDiffNet · AAAI 2024。** 这张点云配准架构图包含特征张量、相似度矩阵、扩散模块和注意力路径。下图由重建后的实际 PPTX 渲染得到。
+### PosDiffNet · AAAI 2024
 
-[![PosDiffNet 架构图：重建为 478 个独立 PowerPoint 对象](examples/posdiffnet/preview.png)](examples/posdiffnet/editable.pptx?raw=true)
+特征张量、相似度矩阵与注意力路径。参考 She 等人的 [PosDiffNet 论文 Figure 1](https://doi.org/10.1609/aaai.v38i1.27775) 重建。
 
-<div align="center">
+**完整重建效果**
 
-**[下载可编辑 PPTX](examples/posdiffnet/editable.pptx?raw=true)** · [论文原图](examples/posdiffnet/reference.png) · [场景 JSON](examples/posdiffnet/scene.json) · [核验记录](examples/posdiffnet/verification.json)
+![PosDiffNet：由可编辑 PowerPoint 文件渲染的完整重建图](examples/posdiffnet/preview.png)
 
-**478 个独立对象 · 475 个原生对象 · 58 个文本框 · 3 张点云图片**
+**在 PowerPoint 中选中全部对象**
 
-</div>
+![真实 PowerPoint 截图：PosDiffNet 的 478 个对象全部选中](docs/assets/posdiffnet-all-selected.png)
 
-文字、特征块的各个面、矩阵单元格、模块和路径均可单独编辑，三处点云视图保留原始像素。文本框包含在原生对象数量中。
+478 个独立对象，文字、矩阵单元格、特征块的各个面和路径均可编辑；仅三处点云视图保留为图片。
 
-改编自 **She 等人的 [PosDiffNet](https://doi.org/10.1609/aaai.v38i1.27775) 论文 Figure 1**。原图权利归原权利人所有，不适用本仓库的 MIT 许可证。参见[来源与重建说明](examples/posdiffnet/README.md)。
+### RepoMaster · NeurIPS 2025
 
-<details>
-<summary><strong>展开对比论文原图</strong></summary>
+代码树、依赖图与循环工作流。参考 Wang 等人的 [RepoMaster 论文 Figure 1](https://arxiv.org/abs/2505.21577) 重建。
 
-![PosDiffNet Figure 1：作者公开论文中的栅格参考图](examples/posdiffnet/reference.png)
+**完整重建效果**
 
-重建依据是公开论文插图的清晰栅格版本，没有导入 PDF 矢量路径或文字对象。主要布局与连接关系保留；细小注意力网格、阴影和圆角有近似处理。这个示例展示单个文件的重建效果，不代表通用识别准确率。
+![RepoMaster：由可编辑 PowerPoint 文件渲染的完整重建图](examples/repomaster/preview.png)
 
-</details>
+**在 PowerPoint 中选中全部对象**
 
-### RepoMaster：树结构、依赖图与循环流程
+![真实 PowerPoint 截图：RepoMaster 的 353 个对象全部选中](docs/assets/repomaster-all-selected.png)
 
-**RepoMaster · NeurIPS 2025。** 第二个案例展示代码树、依赖图、对话气泡和循环工作流的混合布局。下图同样由实际可编辑 PowerPoint 文件渲染得到。
+353 个独立对象，文字、图节点、模块与连接路径均可编辑；16 个复杂标志与插画保留为独立图片。
 
-[![RepoMaster 总览图：重建为可编辑 PowerPoint 对象](examples/repomaster/preview.png)](examples/repomaster/editable.pptx?raw=true)
+### 直接看编辑过程 · SAM 2
 
-<div align="center">
+在桌面 PowerPoint 中选中文字、修改标签、移动模块，再单独选中箭头。
 
-**[下载可编辑 PPTX](examples/repomaster/editable.pptx?raw=true)** · [原始图片](examples/repomaster/reference.png) · [场景 JSON](examples/repomaster/scene.json) · [核验记录](examples/repomaster/verification.json)
+![SAM 2 的真实 PowerPoint 编辑过程：选择文字、修改标签、移动模块和选择箭头](docs/assets/powerpoint-editing.gif)
 
-**353 个独立对象 · 337 个原生对象 · 16 个插画与图标裁片**
-
-</div>
-
-文字、图节点、模块与连接路径均可编辑；复杂吉祥物和标志保留为独立图片。环形标签由旋转文字字符组成。改编自 **Wang 等人的 [RepoMaster](https://arxiv.org/abs/2505.21577) 论文 Figure 1**。参见[重建与来源说明](examples/repomaster/README.md)。
-
-<details>
-<summary><strong>查看真实 PowerPoint 编辑动图 · SAM 2</strong></summary>
-
-已有录屏使用公开 SAM 2 示例，展示真实 PowerPoint 中的选中框、标签修改、模块移动和箭头选择。它用于演示交互效果，不是每次重建都必须执行的核验步骤。
-
-![SAM 2 示例的真实 PowerPoint 操作：选中文字、修改标签、移动模块和选择箭头](docs/assets/powerpoint-editing.gif)
-
-[SAM 2 可编辑 PPTX](examples/sam2/editable.pptx?raw=true) · [原图与来源](examples/sam2/README.md) · [全部对象选中效果](docs/assets/powerpoint-object-selection.png)
-
-动图说明为英文，当前 Office 界面为中文。功能区和选中框均来自真实 PowerPoint 画面。
-
-</details>
+选中状态截图和动图均来自真实 PowerPoint 界面。示例文件、来源与重建说明保留在[案例目录](examples/)中。
 
 ## 功能与适用场景
 

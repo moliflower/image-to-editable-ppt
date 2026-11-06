@@ -20,61 +20,43 @@ Visual understanding by your agent. Native PPTX export with a local FigureForge 
 
 <a id="showcase"></a>
 
-## A paper figure, rebuilt in PowerPoint
+## From image to editable PowerPoint
 
-**PosDiffNet · AAAI 2024.** A detailed point-cloud registration architecture, with feature tensors, similarity matrices, diffusion modules and attention paths. The image below is rendered from the editable PPTX.
+### PosDiffNet · AAAI 2024
 
-[![PosDiffNet architecture reconstructed as 478 independent PowerPoint objects](examples/posdiffnet/preview.png)](examples/posdiffnet/editable.pptx?raw=true)
+Feature tensors, similarity matrices and attention paths, reconstructed from [PosDiffNet, Figure 1](https://doi.org/10.1609/aaai.v38i1.27775) by She et al.
 
-<div align="center">
+**Reconstructed figure**
 
-**[Download editable PPTX](examples/posdiffnet/editable.pptx?raw=true)** · [Original figure](examples/posdiffnet/reference.png) · [Scene JSON](examples/posdiffnet/scene.json) · [Verification](examples/posdiffnet/verification.json)
+![PosDiffNet architecture rendered from the editable PowerPoint file](examples/posdiffnet/preview.png)
 
-**478 objects · 475 native objects · 58 text boxes · 3 point-cloud images**
+**All objects selected in PowerPoint**
 
-</div>
+![Actual PowerPoint screenshot with all 478 PosDiffNet objects selected](docs/assets/posdiffnet-all-selected.png)
 
-Labels, feature-block faces, individual matrix cells, modules and paths remain editable. The three point-cloud views retain their source pixels. Text boxes are included in the native-object count.
+478 independent objects, including editable labels, matrix cells, feature faces and paths. Only the three point-cloud views remain images.
 
-Adapted from **Figure 1 of [PosDiffNet](https://doi.org/10.1609/aaai.v38i1.27775), She et al.** The original figure belongs to its rights holders; it is not covered by this repository's MIT license. [Source and reconstruction notes](examples/posdiffnet/README.md).
+### RepoMaster · NeurIPS 2025
 
-<details>
-<summary><strong>Compare with the original paper figure</strong></summary>
+Repository trees, dependency graphs and a circular workflow, reconstructed from [RepoMaster, Figure 1](https://arxiv.org/abs/2505.21577) by Wang et al.
 
-![PosDiffNet Figure 1, raster reference from the authors' public paper](examples/posdiffnet/reference.png)
+**Reconstructed figure**
 
-The scene was authored against a clear raster of the public paper figure. No PDF vector paths or text objects were imported. The reconstruction preserves the principal layout and connections; minor attention-mesh detail, shading and corners are approximations. This is a file-specific demonstration, not a general accuracy benchmark.
+![RepoMaster overview rendered from the editable PowerPoint file](examples/repomaster/preview.png)
 
-</details>
+**All objects selected in PowerPoint**
 
-### RepoMaster: trees, graphs and an execution loop
+![Actual PowerPoint screenshot with all 353 RepoMaster objects selected](docs/assets/repomaster-all-selected.png)
 
-**RepoMaster · NeurIPS 2025.** A second layout with repository trees, dependency graphs, speech bubbles and a circular workflow. This preview is also rendered from the editable PowerPoint file.
+353 independent objects. Text, graph nodes, modules and routes remain editable; 16 complex logos and illustrations stay as separate images.
 
-[![RepoMaster overview reconstructed as editable PowerPoint objects](examples/repomaster/preview.png)](examples/repomaster/editable.pptx?raw=true)
+### Watch it edited · SAM 2
 
-<div align="center">
-
-**[Download editable PPTX](examples/repomaster/editable.pptx?raw=true)** · [Original figure](examples/repomaster/reference.png) · [Scene JSON](examples/repomaster/scene.json) · [Verification](examples/repomaster/verification.json)
-
-**353 objects · 337 native objects · 16 artwork crops**
-
-</div>
-
-Text, graph nodes, modules and routes stay editable; complex mascots and logos remain separate images. Curved labels use rotated text characters. Adapted from **Figure 1 of [RepoMaster](https://arxiv.org/abs/2505.21577), Wang et al.** [Reconstruction and source notes](examples/repomaster/README.md).
-
-<details>
-<summary><strong>Watch actual PowerPoint editing · SAM 2</strong></summary>
-
-This earlier recording uses the public SAM 2 example. It shows real desktop PowerPoint selection handles, a label edit, module movement and arrow selection. It is an interaction demonstration, not a required verification step for every figure.
+Select a label, change its text, move a module and select an arrow in desktop PowerPoint.
 
 ![Actual PowerPoint recording: selecting text, editing a label, moving a module and selecting an arrow in the SAM 2 example](docs/assets/powerpoint-editing.gif)
 
-[SAM 2 editable PPTX](examples/sam2/editable.pptx?raw=true) · [Reference and attribution](examples/sam2/README.md) · [All-object selection](docs/assets/powerpoint-object-selection.png)
-
-Captions are English; the installed Office interface is Chinese. The ribbon and selection handles are captured from PowerPoint, not simulated.
-
-</details>
+The selection screenshots and animation show real PowerPoint UI. Example files, source attribution and reconstruction notes are retained in the [example directories](examples/).
 
 ## Features and use cases
 

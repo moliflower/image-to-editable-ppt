@@ -17,7 +17,9 @@ The reference is the user-supplied bitmap with the paper caption removed. The ha
 
 ## Verification
 
-The package audit passes with no export warnings. Microsoft PowerPoint rendered the actual PPTX at 1836 × 1218 pixels. The PNG was compared with the source for labels, section layout, graph-node placement, major route directions, object layering and retained artwork. The review corrected an initial-components label overlap and a search arrow hidden by a panel fill. No desktop clicking or Computer Use was used for this example.
+The package audit passes with no export warnings. Microsoft PowerPoint rendered the actual PPTX at 1836 × 1218 pixels. The PNG was compared with the source for labels, section layout, graph-node placement, major route directions, object layering and retained artwork. The review corrected an initial-components label overlap and a search arrow hidden by a panel fill. Routine reconstruction checks used the rendered PNG, without desktop clicking.
+
+The later [all-objects-selected screenshot](../../docs/assets/repomaster-all-selected.png) was explicitly requested for the README. It captures a real PowerPoint selection state on a separate copy of the audited file. This demonstration is not a routine QA requirement.
 
 ## Reproduce
 

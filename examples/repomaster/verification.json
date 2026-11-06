@@ -60,5 +60,19 @@
     ]
   },
   "warnings": [],
-  "scope": "File-specific checks; not a general recognition benchmark."
+  "scope": "File-specific checks; not a general recognition benchmark.",
+  "selectionDemonstration": {
+    "date": "2026-11-06",
+    "capture": "Actual Microsoft PowerPoint window after selecting all slide objects with Ctrl+A",
+    "purpose": "Explicitly requested README demonstration; separate from routine reconstruction QA",
+    "image": "../../docs/assets/repomaster-all-selected.png",
+    "sha256": "9f1927579941df68de93777d8579c7a292e3c5d4703f63441c47fdb76e342bd6",
+    "pptxSha256": "59a277430d5686505036e166ae69bd0dad2291e7157da7459c8fc148d9023cd8",
+    "dimensions": [
+      1278,
+      820
+    ],
+    "processing": "Cropped account/title strip and surrounding margins; no synthetic selection handles or diagram changes",
+    "uiLanguage": "Chinese (installed Office); README captions are English by default"
+  }
 }

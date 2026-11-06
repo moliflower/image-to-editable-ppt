@@ -19,6 +19,8 @@ Counts describe this file, not recognition accuracy on other figures. Text boxes
 
 The independent package audit passes. Microsoft PowerPoint rendered the actual PPTX at 2064 × 1212 pixels, and the preview was visually compared with the reference. No Computer Use session or desktop object-selection probe is required for this check.
 
+The [all-objects-selected screenshot](../../docs/assets/posdiffnet-all-selected.png) separately demonstrates the real PowerPoint selection state, captured on a copy of the audited PPTX at the user's explicit request for the README.
+
 The reconstruction retains the figure's wording, overall layout, module relationships and three point-cloud views. Small attention-mesh segments are illustrative redraws; shadows, rounded corners and some fine glyph geometry differ. Two conservative text-height warnings remain for compact multiline labels; the rendered labels were inspected and are visible without clipping.
 
 ## Reproduce
