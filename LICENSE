@@ -22,3 +22,8 @@ SOFTWARE.
 
 The vendored FigureForge files retain their original license and attribution
 in vendor/figureforge/LICENSE.
+
+Third-party source figures and their reconstructions retain the original
+artwork rights and are excluded from the MIT grant above. See each example's
+source attribution, including examples/sam2/NOTICE.md and
+examples/posdiffnet/SOURCE.md, for the applicable notices.

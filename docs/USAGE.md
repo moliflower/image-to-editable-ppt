@@ -16,6 +16,8 @@ Inspect `render.status`: `rendered` means the actual PPTX produced a preview; `u
 
 Ordinary figures do not need an edit probe, the repository test suite or another example regression. Perform those when maintaining the exporter or diagnosing a specific problem. The sections below expose the individual tools for troubleshooting and advanced use.
 
+Visual review means inspecting the PNG rendered from the PPTX. It does not require Computer Use, opening the editor, clicking through slide objects or recording a GIF. Interactive demonstrations are separate, explicitly requested work.
+
 ## Installation and directory layout
 
 Start with the [quick start](../README.md#quick-start). Install the complete repository:

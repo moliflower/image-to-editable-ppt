@@ -76,3 +76,5 @@ python scripts/open_artifact.py output/figure.pptx
 ```
 
 This uses native file opening on Windows/macOS/Linux without PowerShell or shell interpolation. It reports `open-requested`, not successful on-screen verification. If no desktop/file association is available, return the literal absolute path and preview; do not rebuild a valid PPTX to fix a link-handler problem.
+
+Opening a file for the user is not an extra QA gate. Do not follow it with Computer Use or object-selection probes unless an interactive demonstration or a specific application problem was explicitly requested. Routine visual review uses the renderer's PNG.

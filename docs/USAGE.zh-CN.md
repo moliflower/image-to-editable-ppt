@@ -16,6 +16,8 @@ python -X utf8 scripts/build_figure.py --scene build/scene.json --source referen
 
 普通图片重建无需重复运行编辑探针、整个仓库测试或其他示例回归。这些检查用于维护导出器或调查具体故障。以下单独命令供排查和高级使用。
 
+视觉核验是检查从实际 PPTX 渲染的 PNG，不需要启动 Computer Use、打开编辑器逐个点击对象或录制 GIF。交互演示只在明确请求时单独制作。
+
 ## 安装与目录
 
 首次安装见[快速开始](../README.md#quick-start)。完整目录应包含：

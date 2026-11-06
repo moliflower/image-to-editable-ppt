@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="docs/assets/hero.svg" alt="Image to Editable PowerPoint：将图片中的文字、形状和箭头重建为独立的 PowerPoint 对象" width="100%">
-
 # Image to Editable PowerPoint
 
 **把流程图、科研框架图和架构图，重建成可以继续修改的 PowerPoint。**
@@ -10,8 +8,6 @@
 
 [![Checks](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml/badge.svg)](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2563eb.svg)](LICENSE)
-[![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853d.svg)](#quick-start)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](#quick-start)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed.svg)](SKILL.md)
 
 [English](README.md) · **简体中文**
@@ -24,49 +20,43 @@
 
 <a id="showcase"></a>
 
-## 在真实 PowerPoint 中查看编辑效果
+## 把论文架构图重建为可编辑 PowerPoint
 
-动图展示实际 PowerPoint 操作：选中文本框、修改标签、拖动编码器形状、单独选中反馈箭头，最后选中全部独立对象。边框与控制点来自真实的 PowerPoint 界面。
+**PosDiffNet · AAAI 2024。** 这张点云配准架构图包含特征张量、相似度矩阵、扩散模块和注意力路径。下图由重建后的实际 PPTX 渲染得到。
 
-![真实 PowerPoint 操作：选中文字、修改标签、移动模块并选中箭头](docs/assets/powerpoint-editing.gif)
+[![PosDiffNet 架构图：重建为 478 个独立 PowerPoint 对象](examples/posdiffnet/preview.png)](examples/posdiffnet/editable.pptx?raw=true)
 
 <div align="center">
 
-[下载可编辑 PPTX](examples/sam2/editable.pptx?raw=true) · [查看全部对象的选中框](docs/assets/powerpoint-object-selection.png) · [高清预览](examples/sam2/preview.png) · [案例与录制说明](examples/sam2/README.md)
+**[下载可编辑 PPTX](examples/posdiffnet/editable.pptx?raw=true)** · [论文原图](examples/posdiffnet/reference.png) · [场景 JSON](examples/posdiffnet/scene.json) · [核验记录](examples/posdiffnet/verification.json)
+
+**478 个独立对象 · 475 个原生对象 · 58 个文本框 · 3 张点云图片**
 
 </div>
 
-### 公开 CV 案例：SAM 2 架构图
+文字、特征块的各个面、矩阵单元格、模块和路径均可单独编辑，三处点云视图保留原始像素。文本框包含在原生对象数量中。
 
-参考图来自 [Meta 官方 SAM 2 仓库](https://github.com/facebookresearch/sam2/blob/2b90b9f5ceec907a1c18123530e92e794ad901a4/assets/model_diagram.png)，包含图像编码器、记忆注意力、提示与掩码解码器，以及时间维度的记忆反馈路径。示例目录保留来源说明和 Apache-2.0 许可证。
-
-**58 个独立对象 · 50 个原生对象 · 10 个文本框 · 16 条箭头 · 8 个照片裁片**
+改编自 **She 等人的 [PosDiffNet](https://doi.org/10.1609/aaai.v38i1.27775) 论文 Figure 1**。原图权利归原权利人所有，不适用本仓库的 MIT 许可证。参见[来源与重建说明](examples/posdiffnet/README.md)。
 
 <details>
-<summary><strong>展开查看官方参考图与 PPTX 重建结果</strong></summary>
+<summary><strong>展开对比论文原图</strong></summary>
 
-**官方参考图**
+![PosDiffNet Figure 1：作者公开论文中的栅格参考图](examples/posdiffnet/reference.png)
 
-![SAM 2 官方架构图](examples/sam2/reference.png)
-
-**Microsoft PowerPoint 实际渲染的重建结果**
-
-![SAM 2 可编辑 PowerPoint 重建结果](examples/sam2/preview.png)
-
-[场景 JSON](examples/sam2/scene.json) · [核验记录](examples/sam2/verification.json) · [来源与许可证](examples/sam2/README.md#source)
+重建依据是公开论文插图的清晰栅格版本，没有导入 PDF 矢量路径或文字对象。主要布局与连接关系保留；细小注意力网格、阴影和圆角有近似处理。这个示例展示单个文件的重建效果，不代表通用识别准确率。
 
 </details>
 
-动图由实际桌面操作画面组成，附有英文步骤说明。照片仍为图片；文字、模块和箭头是独立原生对象。上述类别有包含关系，不应直接相加，也不代表通用识别准确率。
-
 <details>
-<summary><strong>查看最小示例：17 个对象，快速验证导出环境</strong></summary>
+<summary><strong>查看真实 PowerPoint 编辑动图 · SAM 2</strong></summary>
 
-![基础示例：输入图片、逐元素重建、可编辑 PPT 与反馈箭头](examples/diagram.png)
+已有录屏使用公开 SAM 2 示例，展示真实 PowerPoint 中的选中框、标签修改、模块移动和箭头选择。它用于演示交互效果，不是每次重建都必须执行的核验步骤。
 
-[下载基础 PPTX](examples/diagram.pptx?raw=true) · [查看场景 JSON](examples/diagram.scene.json)
+![SAM 2 示例的真实 PowerPoint 操作：选中文字、修改标签、移动模块和选择箭头](docs/assets/powerpoint-editing.gif)
 
-这个受控示例包含 **17 个独立对象、6 个文本框、3 条箭头**，适合先跑通导出、结构检查与 PowerPoint 渲染。它用于验证导出能力。
+[SAM 2 可编辑 PPTX](examples/sam2/editable.pptx?raw=true) · [原图与来源](examples/sam2/README.md) · [全部对象选中效果](docs/assets/powerpoint-object-selection.png)
+
+动图说明为英文，当前 Office 界面为中文。功能区和选中框均来自真实 PowerPoint 画面。
 
 </details>
 
@@ -85,15 +75,7 @@
 
 本地导出器支持 **双端箭头、自定义虚线间距，以及形状、路径和图片旋转**。新裁片会保留原图坐标与像素摘要，审计可回到原图逐项核验。字体、字号保持显式指定，不依赖浏览器 Canvas。参见[原生能力示例](examples/native-capabilities.scene.json)与[场景格式](references/scene-schema.md)。
 
-### 科研标注保留在同一个文本框
-
-同一文本框可以混排颜色、字体、粗斜体、下划线与**上下标**，修改标签时无需移动多个碎片。原生线性渐变支持色标透明度。独立审计会检查保存后的字号、字体、基线偏移及渐变参数，并继续核验图形与图片来源。
-
-![PowerPoint 实际渲染的原创能力示例：混合格式科研标注与原生透明渐变](examples/scientific-text/preview.png)
-
-[下载可编辑示例](examples/scientific-text/editable.pptx?raw=true) · [场景与验证说明](examples/scientific-text/README.md) · [同类项目代码调研](references/related-projects.md)
-
-这个原创能力示例含 18 个原生对象，其中 12 个文本框。上下标属于可编辑文字，不是原生公式对象；该示例用于展示新增能力，上面的 SAM 2 示例用于展示公开图片重建。
+同一文本框支持混排字体、颜色、粗斜体与**上下标**，原生渐变保留色标透明度。[科研文字测试样例](examples/scientific-text/README.md)和 [17 对象最小场景](examples/diagram.scene.json)保留在示例目录中，供工具链开发与测试使用。
 
 **适合**科研方法图、模型结构图、技术流程图，以及由文字、规则形状和箭头组成的示意图。识图由你正在使用的视觉智能体完成；本项目提供技能指令与本地导出工具，命令行接收的是重建后的场景 JSON。
 

@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="docs/assets/hero.svg" alt="Image to Editable PowerPoint: reconstruct diagram text, shapes, and arrows as separate slide objects" width="100%">
-
 # Image to Editable PowerPoint
 
 **Reconstruct an existing diagram as PowerPoint objects you can keep editing.**
@@ -10,8 +8,6 @@ Visual understanding by your agent. Native PPTX export with a local FigureForge 
 
 [![Checks](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml/badge.svg)](https://github.com/moliflower/image-to-editable-ppt/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2563eb.svg)](LICENSE)
-[![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853d.svg)](#quick-start)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](#quick-start)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed.svg)](SKILL.md)
 
 **English** · [简体中文](README.zh-CN.md)
@@ -24,49 +20,43 @@ Visual understanding by your agent. Native PPTX export with a local FigureForge 
 
 <a id="showcase"></a>
 
-## See it edited in PowerPoint
+## A paper figure, rebuilt in PowerPoint
 
-The GIF below records edits in desktop Microsoft PowerPoint. It selects a text box, changes a label, moves an encoder shape, selects a feedback arrow, and selects all independent objects.
+**PosDiffNet · AAAI 2024.** A detailed point-cloud registration architecture, with feature tensors, similarity matrices, diffusion modules and attention paths. The image below is rendered from the editable PPTX.
 
-![Actual PowerPoint recording: select native text, edit a label, move a module, and select an arrow](docs/assets/powerpoint-editing.gif)
+[![PosDiffNet architecture reconstructed as 478 independent PowerPoint objects](examples/posdiffnet/preview.png)](examples/posdiffnet/editable.pptx?raw=true)
 
 <div align="center">
 
-[Download editable PPTX](examples/sam2/editable.pptx?raw=true) · [Inspect all-object selection](docs/assets/powerpoint-object-selection.png) · [Preview](examples/sam2/preview.png) · [Example and recording notes](examples/sam2/README.md)
+**[Download editable PPTX](examples/posdiffnet/editable.pptx?raw=true)** · [Original figure](examples/posdiffnet/reference.png) · [Scene JSON](examples/posdiffnet/scene.json) · [Verification](examples/posdiffnet/verification.json)
+
+**478 objects · 475 native objects · 58 text boxes · 3 point-cloud images**
 
 </div>
 
-### Public CV example: SAM 2 architecture
+Labels, feature-block faces, individual matrix cells, modules and paths remain editable. The three point-cloud views retain their source pixels. Text boxes are included in the native-object count.
 
-Reconstructed from the architecture image in [Meta's official SAM 2 repository](https://github.com/facebookresearch/sam2/blob/2b90b9f5ceec907a1c18123530e92e794ad901a4/assets/model_diagram.png). The diagram includes image and memory encoders, memory attention, prompt and mask decoders, and temporal feedback paths. Source attribution and Apache-2.0 license are retained with the example.
-
-**58 independent objects · 50 native objects · 10 text boxes · 16 arrows · 8 photo crops**
+Adapted from **Figure 1 of [PosDiffNet](https://doi.org/10.1609/aaai.v38i1.27775), She et al.** The original figure belongs to its rights holders; it is not covered by this repository's MIT license. [Source and reconstruction notes](examples/posdiffnet/README.md).
 
 <details>
-<summary><strong>Compare the public reference and the reconstructed PPTX</strong></summary>
+<summary><strong>Compare with the original paper figure</strong></summary>
 
-**Official reference image**
+![PosDiffNet Figure 1, raster reference from the authors' public paper](examples/posdiffnet/reference.png)
 
-![Official SAM 2 architecture reference](examples/sam2/reference.png)
-
-**Reconstructed PPTX, rendered by Microsoft PowerPoint**
-
-![Native PowerPoint reconstruction of the SAM 2 architecture](examples/sam2/preview.png)
-
-[Scene JSON](examples/sam2/scene.json) · [Verification](examples/sam2/verification.json) · [Source and license](examples/sam2/README.md#source)
+The scene was authored against a clear raster of the public paper figure. No PDF vector paths or text objects were imported. The reconstruction preserves the principal layout and connections; minor attention-mesh detail, shading and corners are approximations. This is a file-specific demonstration, not a general accuracy benchmark.
 
 </details>
 
-The animation uses captured desktop interaction states with English captions. The ribbon and selection handles are actual PowerPoint UI. Photo pixels remain images; text, modules, and arrows are separate native objects. Counts describe this example, not a general accuracy benchmark.
-
 <details>
-<summary><strong>Minimal export example: 17 objects</strong></summary>
+<summary><strong>Watch actual PowerPoint editing · SAM 2</strong></summary>
 
-![Minimal scene with native text, geometric shapes, and a curved arrow](examples/diagram.png)
+This earlier recording uses the public SAM 2 example. It shows real desktop PowerPoint selection handles, a label edit, module movement and arrow selection. It is an interaction demonstration, not a required verification step for every figure.
 
-[Download PPTX](examples/diagram.pptx?raw=true) · [Scene JSON](examples/diagram.scene.json)
+![Actual PowerPoint recording: selecting text, editing a label, moving a module and selecting an arrow in the SAM 2 example](docs/assets/powerpoint-editing.gif)
 
-This controlled example contains 17 objects, 6 text boxes, and 3 arrows. Use it to verify the exporter, audit, and rendering setup.
+[SAM 2 editable PPTX](examples/sam2/editable.pptx?raw=true) · [Reference and attribution](examples/sam2/README.md) · [All-object selection](docs/assets/powerpoint-object-selection.png)
+
+Captions are English; the installed Office interface is Chinese. The ribbon and selection handles are captured from PowerPoint, not simulated.
 
 </details>
 
@@ -85,15 +75,7 @@ When all you have is a screenshot, a paper figure, or an old architecture image,
 
 The local exporter supports **bidirectional arrows, custom dash spacing, and rotation of shapes, paths, and images**. New photo crops retain source coordinates and pixel digests; the audit can verify them against the original image. Explicit fonts and sizes remain under your control, with no browser Canvas dependency. See the [native capability example](examples/native-capabilities.scene.json) and [scene schema](references/scene-schema.md).
 
-### Scientific text stays together
-
-Keep mixed colors, fonts, emphasis, and **superscripts/subscripts inside one editable text box**. Linear gradients support transparent color stops. The independent audit verifies the saved font sizes, typefaces, baseline offsets and gradient values, alongside geometry and image provenance.
-
-![Original capability demo rendered by Microsoft PowerPoint: mixed-format scientific labels and a transparent native gradient](examples/scientific-text/preview.png)
-
-[Download the editable demo](examples/scientific-text/editable.pptx?raw=true) · [Scene and verification notes](examples/scientific-text/README.md) · [Related-project code review](references/related-projects.md)
-
-This original capability demo has 18 native objects, including 12 text boxes. It demonstrates editable text indices, not native equation objects. It is separate from the public SAM 2 reconstruction above.
+Mixed fonts, colors, emphasis and **superscripts/subscripts can stay in one editable text box**. Native gradients retain transparent color stops. Compact [scientific-text fixtures](examples/scientific-text/README.md) and the [17-object smoke-test scene](examples/diagram.scene.json) remain available for toolchain development.
 
 Designed for scientific method figures, model architectures, flowcharts, and diagrams built from text and geometric elements. The agent interprets the image and authors a scene JSON. The CLI exports that scene; it is not a standalone image-to-OCR command.
 

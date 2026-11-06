@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-06",
+  "source": {
+    "paper": "PosDiffNet",
+    "figure": 1,
+    "doi": "10.1609/aaai.v38i1.27775",
+    "referenceSha256": "6c0523ae67815b728782f40181a9247e98ad690c90f9441a5ddf4b490731530c",
+    "rights": "Original artwork excluded from repository MIT license; see SOURCE.md",
+    "input": "Raster crop of public paper; no imported PDF vector paths or text objects"
+  },
+  "output": {
+    "file": "editable.pptx",
+    "sha256": "f37799ed8bb07a18528ae80c801c1af9b03f0d7c504539f9dce24671c67794dd"
+  },
+  "audit": {
+    "passed": true,
+    "errors": [],
+    "objectCount": 478,
+    "textBoxes": 58,
+    "nativeShapes": 475,
+    "images": 3,
+    "arrows": 37,
+    "arrowheads": 37,
+    "verifiedImagePixels": 3,
+    "verifiedTextStyles": 58,
+    "richTextBoxes": 28,
+    "gradientShapes": 0,
+    "verifiedSourceAssets": 3,
+    "originalSourceChecked": true,
+    "originalSourceVerifiedAssets": 3,
+    "imagesWithoutSourceProvenance": 0,
+    "visualVerification": "not-performed-by-this-audit"
+  },
+  "visualVerification": {
+    "renderer": "Microsoft PowerPoint",
+    "preview": "preview.png",
+    "previewSha256": "2334823ae7222096ddc3b8ebfb0921c396ea919ae5906cd762ba96222c64fe82",
+    "dimensions": [
+      2064,
+      1212
+    ],
+    "reviewed": true,
+    "method": "Reviewed renderer PNG against the raster reference; no Computer Use required",
+    "checked": [
+      "main module topology",
+      "visible labels and indices",
+      "matrix grid dimensions",
+      "three source crops",
+      "overlap and clipping"
+    ],
+    "differences": [
+      "Small attention-mesh segments are illustrative redraws",
+      "Shading, corner radii and fine glyph geometry differ"
+    ],
+    "resolvedIssues": [
+      "Corresponding-pair label overlap",
+      "Similarity matrix column count"
+    ]
+  },
+  "warnings": [
+    "window-embedding-label: text box may be too short for the declared font and line count",
+    "multiscale-p-label: text box may be too short for the declared font and line count"
+  ],
+  "warningReview": "Compact multiline labels are visible in the actual PowerPoint render; conservative frame-height warnings retained.",
+  "scope": "File-specific verification; not a general recognition benchmark."
+}
